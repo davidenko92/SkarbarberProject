@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Skar Barber - Reservas</title>
+<!-- Include Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Include FontAwesome for icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style data-purpose="custom-fonts">
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .serif-text {
+      font-family: 'Playfair Display', serif;
+    }
+  </style>
+<style data-purpose="glassmorphism">/* Custom styles for the glass effect and background */
+.bg-blur-image {
+    background-image: url('fotobarberia.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    filter: blur(4px);
+    transform: scale(1.05);
+    z-index: -2
+    }
+.bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.7) 100%);
+    z-index: -1
+    }
+.glass-card {
+    background: rgba(30, 30, 30, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1)
+    }
+.logo-glow {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8)
+    }</style>
+</head>
+<body class="text-white min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Background Image & Overlay -->
+<div class="bg-blur-image"></div>
+<div class="bg-overlay"></div>
+<!-- BEGIN: MainContent -->
+<main class="w-full max-w-2xl px-4 flex-grow flex flex-col items-center justify-center relative z-10 mt-16">
+<!-- Glassmorphism Card -->
+<div class="glass-card rounded-2xl p-8 md:p-12 w-full text-center relative pt-20">
+<!-- Logo Container (overlapping top) -->
+<div class="absolute -top-20 left-1/2 transform -translate-x-1/2">
+<div class="bg-white rounded-full p-2 logo-glow w-36 h-36 flex items-center justify-center overflow-hidden border border-white/20">
+<!-- Logo Image -->
+<img alt="Skar Barber Logo" class="w-full h-full object-contain rounded-full" src="Logo.jpeg"/>
+</div>
+</div>
+<!-- Divider -->
+<hr class="border-t border-white/20 w-4/5 mx-auto mb-8 mt-2"/>
+<!-- Text Content -->
+<div class="serif-text space-y-4 mb-10">
+<p class="text-2xl tracking-wide">Buenas tardes</p>
+<p class="text-xl leading-relaxed">
+          Por cambio de web de citas,<br/>
+          no están disponibles las reservas online.<br/>
+          Para reservar cita vía telefónica:
+        </p>
+</div>
+<!-- Buttons Container -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+<!-- Call Button -->
+<a class="group flex items-center justify-center gap-3 bg-[#0a0a0a] hover:bg-black border border-white/50 rounded-lg px-8 py-3 w-full sm:w-auto transition-all duration-300" href="tel:+34623404772">
+<i class="fa-solid fa-phone text-sm group-hover:-rotate-12 transition-transform"></i>
+<span class="font-medium tracking-wide">Llamar</span>
+</a>
+<!-- WhatsApp Button -->
+<a class="group flex items-center justify-center gap-3 bg-[#0a0a0a] hover:bg-black border border-white/50 rounded-lg px-8 py-3 w-full sm:w-auto transition-all duration-300" href="https://wa.me/34623404772" rel="noopener noreferrer" target="_blank">
+<i class="fa-brands fa-whatsapp text-lg group-hover:scale-110 transition-transform"></i>
+<span class="font-medium tracking-wide">WhatsApp</span>
+</a>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Footer -->
+<footer class="w-full pb-6 pt-8 flex flex-col items-center gap-4 z-10 relative mt-auto">
+<!-- Social Icons -->
+<div class="flex items-center gap-6">
+<a aria-label="Instagram" class="flex items-center gap-2 text-white/80 hover:text-white transition-colors" href="https://instagram.com/skarbarber" rel="noopener noreferrer" target="_blank">
+<i class="fa-brands fa-instagram text-xl"></i>
+<span class="text-sm tracking-wide">@skarbarber</span>
+</a>
+</div>
+<!-- Copyright -->
+<p class="text-xs text-white/60">
+      © 2024 Skarbarber. Todos los derechos reservados.
+    </p>
+</footer>
+<!-- END: Footer -->
+</body></html>
