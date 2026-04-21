@@ -1,94 +1,88 @@
-// Database types - will be auto-generated from Supabase later
-// For now, manual types matching our schema
+// Tipos de base de datos - coinciden con el schema de Supabase
 
-export type Tenant = {
+export type Negocio = {
   id: string;
-  name: string;
-  slug: string;
-  phone: string | null;
-  address: string | null;
-  timezone: string;
-  business_hours: BusinessHours;
-  created_at: string;
-  updated_at: string;
+  nombre: string;
+  telefono: string | null;
+  direccion: string | null;
+  zona_horaria: string;
+  horario_laboral: HorarioLaboral;
+  creado_en: string;
+  actualizado_en: string;
 };
 
-export type BusinessHours = {
-  mon: DayHours | null;
-  tue: DayHours | null;
-  wed: DayHours | null;
-  thu: DayHours | null;
-  fri: DayHours | null;
-  sat: DayHours | null;
-  sun: DayHours | null;
+export type HorarioLaboral = {
+  lun: HorarioTramo[] | null;
+  mar: HorarioTramo[] | null;
+  mie: HorarioTramo[] | null;
+  jue: HorarioTramo[] | null;
+  vie: HorarioTramo[] | null;
+  sab: HorarioTramo[] | null;
+  dom: HorarioTramo[] | null;
 };
 
-export type DayHours = {
-  open: string; // "09:00"
-  close: string; // "20:00"
+export type HorarioTramo = {
+  apertura: string; // "10:00"
+  cierre: string;   // "14:00"
 };
 
-export type Profile = {
+export type Empleado = {
   id: string;
-  tenant_id: string;
-  full_name: string;
-  role: "owner" | "barber";
-  phone: string | null;
+  nombre: string;
+  rol: "propietario" | "barbero";
+  telefono: string | null;
   avatar_url: string | null;
-  is_active: boolean;
-  created_at: string;
+  activo: boolean;
+  creado_en: string;
 };
 
-export type Client = {
+export type Cliente = {
   id: string;
-  tenant_id: string;
-  name: string;
-  phone: string | null;
+  nombre: string;
+  telefono: string | null;
   email: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
+  notas: string | null;
+  creado_en: string;
+  actualizado_en: string;
 };
 
-export type Service = {
+export type Servicio = {
   id: string;
-  tenant_id: string;
-  name: string;
-  duration: number; // minutes
-  price: number; // euros
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
+  nombre: string;
+  duracion: number;  // minutos
+  precio: number;    // euros
+  activo: boolean;
+  orden: number;
+  creado_en: string;
 };
 
-export type Appointment = {
+export type Cita = {
   id: string;
-  tenant_id: string;
-  client_id: string;
-  barber_id: string;
-  service_id: string;
-  starts_at: string;
-  ends_at: string;
-  status: "confirmed" | "completed" | "cancelled" | "no_show";
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
+  cliente_id: string;
+  empleado_id: string;
+  servicio_id: string;
+  inicio: string;
+  fin: string;
+  estado: "confirmada" | "completada" | "cancelada" | "no_asistio";
+  notas: string | null;
+  creado_en: string;
+  actualizado_en: string;
 };
 
-export type Reminder = {
+export type Recordatorio = {
   id: string;
-  appointment_id: string;
-  channel: "whatsapp" | "email" | "sms";
-  status: "pending" | "sent" | "failed" | "delivered";
-  scheduled_for: string;
-  sent_at: string | null;
-  error_message: string | null;
-  created_at: string;
+  cita_id: string;
+  canal: "whatsapp" | "email" | "sms";
+  estado: "pendiente" | "enviado" | "fallido" | "entregado";
+  programado_para: string;
+  enviado_en: string | null;
+  mensaje_error: string | null;
+  creado_en: string;
 };
 
-// Joined types for UI
-export type AppointmentWithDetails = Appointment & {
-  client: Client;
-  service: Service;
-  barber: Profile;
+// Tipos con relaciones para la UI
+export type CitaConDetalles = Cita & {
+  cliente: Cliente;
+  servicio: Servicio;
+  empleado: Empleado;
 };
