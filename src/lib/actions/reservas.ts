@@ -252,42 +252,29 @@ export async function crearReserva(input: ReservaInput): Promise<ReservaResult> 
     return { success: false, error: "Esa hora ya no está disponible" };
   }
 
-  const { data: clienteRow, error: clienteError } = await supabase
-    .from("clientes")
-    .upsert(
-      {
-        nombre: cliente.nombre,
-        telefono: cliente.telefono,
-        email: cliente.email || null,
-      },
-      { onConflict: "telefono" },
-    )
-    .select("id")
-    .single();
-
-  if (clienteError || !clienteRow) {
-    return { success: false, error: "No se pudo registrar el cliente" };
-  }
-
   const inicio = new Date(`${fecha}T${hora}:00`);
   const fin = new Date(inicio.getTime() + servicio.duracion * 60_000);
 
-  const { data: cita, error: citaError } = await supabase
-    .from("citas")
-    .insert({
-      cliente_id: clienteRow.id,
-      empleado_id: empleadoId,
-      servicio_id: servicioId,
-      inicio: inicio.toISOString(),
-      fin: fin.toISOString(),
-      notas: cliente.notas || null,
-    })
-    .select("id")
-    .single();
+  const { data: citaId, error: rpcError } = await supabase.rpc(
+    "crear_reserva_publica",
+    {
+      p_empleado_id: empleadoId,
+      p_servicio_id: servicioId,
+      p_inicio: inicio.toISOString(),
+      p_fin: fin.toISOString(),
+      p_nombre: cliente.nombre,
+      p_telefono: cliente.telefono,
+      p_email: cliente.email || null,
+      p_notas: cliente.notas || null,
+    },
+  );
 
-  if (citaError || !cita) {
-    return { success: false, error: "No se pudo crear la cita" };
+  if (rpcError || !citaId) {
+    return {
+      success: false,
+      error: rpcError?.message ?? "No se pudo crear la reserva",
+    };
   }
 
-  return { success: true, citaId: cita.id };
+  return { success: true, citaId: citaId as string };
 }
