@@ -23,10 +23,6 @@ export function ReservarShell({
     <div className="relative min-h-dvh w-full overflow-hidden">
       <SilkBackground />
 
-      {/* Decorative gold corners */}
-      <div className="pointer-events-none absolute left-5 top-5 z-10 h-36 w-36 border-l border-t border-gold/30" />
-      <div className="pointer-events-none absolute bottom-5 right-5 z-10 h-28 w-28 border-b border-r border-gold/30" />
-
       <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 py-6">
         {showHeader && (
           <header className="mb-10">
