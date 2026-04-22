@@ -8,11 +8,12 @@ Registro de gastos realizados para el desarrollo y operación de la app, para tr
 
 ## Resumen
 
-| Concepto | Periodicidad | Coste actual | Notas |
+| Concepto | Periodicidad | Coste estimado | Estado |
 |---|---|---|---|
-| **TOTAL setup** | Una vez | 0,00 € | Sin gastos aún |
+| Dominio `.com` / `.es` | Anual | ~12 € | Pendiente de compra |
+| **TOTAL setup** | Una vez | 0,00 € | — |
 | **TOTAL mensual** | Mensual | 0,00 € | Todo en free tier |
-| **TOTAL anual** | Anual | 0,00 € | — |
+| **TOTAL anual** | Anual | ~12 € | Solo dominio pendiente |
 
 ---
 
@@ -39,9 +40,14 @@ Registro de gastos realizados para el desarrollo y operación de la app, para tr
 ## Servicios externos
 
 ### Dominio propio
-- **Estado:** NO contratado
-- **Coste estimado:** 10-15 €/año (`.com` o `.es` en Namecheap / Cloudflare Registrar)
-- **Cuándo:** antes de lanzar a producción para emails profesionales y branding
+- **Estado:** NO contratado — a comprar antes de producción
+- **Coste estimado:** 10-15 €/año
+- **Opciones recomendadas:**
+  - Cloudflare Registrar — precio de coste (~9 €/año `.com`), sin upsells
+  - Namecheap — ~11 €/año `.com`, incluye WhoisGuard
+  - `.es` vía 1&1 / Nominalia — ~8-12 €/año
+- **Nombres candidatos:** `skarbarber.com`, `skarbarber.es`, `skarbarber.app`
+- **Uso:** producción (sustituye URL de Vercel), emails transaccionales Resend, branding
 
 ### Email transaccional
 - **Estado:** NO decidido
