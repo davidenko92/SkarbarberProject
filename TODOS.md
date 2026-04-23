@@ -2,7 +2,7 @@
 
 > Documento vivo. Se actualiza al cerrar cada tarea. Si se pierde el contexto de sesión, Claude lee este fichero para retomar.
 
-**Última actualización:** 2026-04-22
+**Última actualización:** 2026-04-23
 
 ---
 
@@ -55,14 +55,50 @@
 - [ ] Decisión política formato teléfono (+34 o libre).
 
 ### Dashboard admin `/(dashboard)`
-- [ ] Vista agenda (día/semana) con citas del barbero logueado.
-- [ ] Crear cita manual.
-- [ ] Editar/cancelar cita.
-- [ ] CRUD clientes.
-- [ ] CRUD servicios.
-- [ ] CRUD empleados.
-- [ ] Configuración del negocio (horario, datos fiscales).
-- [ ] Server Actions CRUD en `src/lib/actions/`.
+
+> Ver desglose completo en [PLAN-DASHBOARD.md](PLAN-DASHBOARD.md).
+
+**Fase 0 — Shell**
+- [ ] Resolver conflicto de rutas `/` (ver PLAN-DASHBOARD).
+- [ ] Layout dashboard con identidad gold + Playfair + bottom nav móvil + sidebar desktop.
+- [ ] Componentes base: `GlassPanel`, `GoldBadge`, `StatCard`, `DataTable`, `EmptyState`.
+
+**Fase 1 — Agenda (core)**
+- [ ] Vista día con timeline vertical (tramos mañana/tarde).
+- [ ] Tarjeta glass por cita (hora, cliente, servicio, tap-to-call).
+- [ ] Filtros por empleado (Todos / Raúl / Darío).
+- [ ] Navegación por fechas (swipe + flechas + date picker).
+- [ ] FAB "+ Cita manual".
+- [ ] Estados visuales: confirmada / completada / cancelada.
+- [ ] Sheet de detalle con acciones (editar, cancelar, completar).
+- [ ] Server actions: `getCitasDelDia`, `actualizarCita`, `cancelarCita`.
+
+**Fase 2 — Crear cita manual**
+- [ ] Flow admin multi-step con autocomplete de clientes.
+- [ ] Opción walk-in (cliente sin registrar).
+- [ ] Server action `crearCitaManual`.
+
+**Fase 3 — Clientes**
+- [ ] Listado ordenado por última visita + búsqueda con debounce.
+- [ ] Ficha cliente: historial, total gastado, nota interna.
+- [ ] Acciones: llamar, WhatsApp, nueva cita.
+- [ ] Server actions CRUD clientes.
+
+**Fase 4 — Servicios / Empleados / Config**
+- [ ] CRUD servicios (nombre, duración, precio, activo).
+- [ ] CRUD empleados (solo owner).
+- [ ] Editor de horario laboral por día.
+- [ ] Datos fiscales negocio.
+
+**Fase 5 — KPIs (opcional MVP)**
+- [ ] 4 KPI cards (hoy, semana, ingresos mes, clientes nuevos).
+- [ ] Gráfico ocupación semanal.
+- [ ] Top clientes + Top servicios.
+
+**Fase 6 — PWA + notificaciones**
+- [ ] `manifest.json` + iconos.
+- [ ] Service worker básico.
+- [ ] Push al barbero en nueva reserva (Supabase Realtime).
 
 ### Infra
 - [ ] Merge `feature/reservar-design` → `main` para sustituir ventana de mantenimiento en producción.
@@ -132,6 +168,7 @@
 
 - [CLAUDE.md](CLAUDE.md) — contexto permanente del proyecto.
 - [COSTES.md](COSTES.md) — registro de gastos y suscripciones.
+- [PLAN-DASHBOARD.md](PLAN-DASHBOARD.md) — plan detallado del dashboard admin.
 - [AGENTS.md](AGENTS.md) — aviso sobre Next.js 16 (breaking changes).
 - [supabase/migrations/001_initial_schema.sql](supabase/migrations/001_initial_schema.sql) — esquema.
 - [supabase/migrations/002_reserva_publica_rpc.sql](supabase/migrations/002_reserva_publica_rpc.sql) — RPC reserva pública.
