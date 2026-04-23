@@ -34,30 +34,41 @@ Basado en recomendaciones de `ui-ux-pro-max` adaptadas a la identidad Skarbarber
 - **Layout:** mobile-first puro. Bottom nav (4 items), FAB para "nueva cita", safe-areas top/bottom, content padding 16px lateral. Sidebar desktop es bonus.
 - **Gráficos:** ocupación por día (barras horizontales), KPIs como cards numéricas. Recharts o visx (decisión al llegar a Fase 5).
 
+### Efectos "street / videogame" (elegidos)
+
+Tres efectos cohesivos, todos puro CSS/transform — cero librerías pesadas, 60fps garantizados:
+
+1. **Border pulse gold en cita activa/siguiente** — animación `box-shadow` pulsando 2-3s, simula "cursor seleccionado" de menú de videojuego. Aplicar solo a la próxima cita del día para guiar la atención.
+2. **Shimmer gold en CTAs** — gradiente lineal barriendo el botón cada 3s, con `mask` para contenerlo al borde. Aplicar a FAB "+ Cita" y botones primarios.
+3. **Bordes gradient-conic rotando en elementos seleccionados** — `background: conic-gradient` rotando lento (8s) en el borde de tabs activos, empleado filtrado, día seleccionado. Da sensación de "slot activo".
+
+Todos respetan `prefers-reduced-motion`: pulse y rotación se detienen, shimmer desaparece.
+
 ---
 
 ## Arquitectura de rutas
 
-Rutas protegidas por auth (middleware ya configurado). Grupo `(dashboard)`:
+**Decisión tomada:** el dashboard vive en `/panel/*`. El barbero no ve URLs (PWA), pero internamente se separa limpio del flujo público.
 
 ```
-src/app/(dashboard)/
-├── layout.tsx                 # Shell: header + bottom nav + sidebar desktop
-├── page.tsx                   # Agenda (home del admin)
-├── agenda/
-│   └── [fecha]/page.tsx       # Vista día concreto
-├── clientes/
-│   ├── page.tsx               # Listado + búsqueda
-│   └── [id]/page.tsx          # Ficha cliente con historial
-├── servicios/
-│   └── page.tsx               # CRUD servicios
-├── empleados/
-│   └── page.tsx               # CRUD empleados (solo owner)
-└── config/
-    └── page.tsx               # Negocio, horario, datos fiscales
+src/app/
+├── page.tsx                   # / → redirect /reservar (cliente)
+├── reservar/...               # Web pública de citas
+├── login/                     # Login (público)
+└── panel/                     # Dashboard admin (auth + PWA)
+    ├── layout.tsx             # Shell: header + bottom nav
+    ├── page.tsx               # /panel → Agenda (home del admin)
+    ├── clientes/
+    │   ├── page.tsx           # /panel/clientes
+    │   └── [id]/page.tsx      # /panel/clientes/[id]
+    ├── servicios/page.tsx     # /panel/servicios
+    ├── empleados/page.tsx     # /panel/empleados (solo owner)
+    └── config/page.tsx        # /panel/config
 ```
 
-**Nota:** `src/app/page.tsx` ya redirige a `/reservar`. El dashboard usa `/(dashboard)/page.tsx` como "agenda de hoy". Next.js resuelve `(dashboard)/page.tsx` → `/` sólo cuando no existe conflicto; actualmente existe conflicto y deberíamos consolidar — ver Fase 0.
+- `manifest.json` usa `start_url: "/panel"` — la PWA instalada abre directamente la agenda.
+- Middleware protege todo `/panel/*` con auth.
+- Se elimina el grupo `(dashboard)` y se renombra a `panel` en Fase 0.
 
 ---
 
@@ -65,7 +76,8 @@ src/app/(dashboard)/
 
 ### Fase 0 — Preparar shell mobile (1 sesión)
 
-- [ ] Resolver conflicto de rutas `/` (ver sección "Arquitectura de rutas").
+- [ ] Renombrar `src/app/(dashboard)` → `src/app/panel` y borrar layout/page obsoletos.
+- [ ] Actualizar middleware: proteger `/panel/*` (ya no redirige `/` a login).
 - [ ] Rediseñar `layout.tsx` del grupo dashboard con identidad gold + Playfair.
 - [ ] Header compacto: logo gorila (36px circular) + título página + botón avatar/logout.
 - [ ] Bottom nav móvil fijo (4 items con icono + label): Agenda · Clientes · Servicios · Config.
@@ -128,9 +140,10 @@ src/app/(dashboard)/
 
 ### Fase 6 — PWA + notificaciones
 
-- [ ] `manifest.json` con iconos y colores dorados.
-- [ ] Service worker básico (cache de shell).
-- [ ] Prompt de instalación (iOS/Android).
+- [ ] `manifest.json` con `start_url: "/panel"`, theme_color `#c4a462`, background_color `#000`.
+- [ ] Iconos PWA generados desde el logo gorila (192, 512, maskable).
+- [ ] Service worker básico (cache shell + agenda del día offline).
+- [ ] Prompt de instalación (iOS/Android) la primera vez que el barbero entra.
 - [ ] Notificaciones push al barbero cuando entra nueva reserva pública (Supabase Realtime + Web Push API).
 
 ---
