@@ -1,9 +1,20 @@
 # Plan de acción — Dashboard admin Skarbarber
 
-> Panel de gestión para Raúl (owner) y Darío (barbero). PWA instalable en móvil. Coherente visualmente con el flujo `/reservar`.
+> App **mobile-first** de gestión para Raúl (owner), Darío y futuros compañeros. Se usa desde el móvil detrás del espejo mientras cortan. PWA instalable. Coherente visualmente con `/reservar`.
 
 **Creado:** 2026-04-23
 **Estado:** Dashboard actual es un scaffold casi vacío (`/(dashboard)/page.tsx` con placeholder "Agenda de hoy").
+
+## Principio rector
+
+**El móvil es el primer (y casi único) dispositivo.** Raúl revisa la agenda en el móvil entre cliente y cliente. Decisiones de diseño:
+
+- Tap targets ≥48px, separación ≥12px (están con guantes o manos ocupadas a veces).
+- Todo accesible con pulgar derecho en el tercio inferior de la pantalla.
+- Bottom nav persistente, FAB para acción primaria.
+- Desktop es un "lujo" — responsive pero no prioritario.
+- Offline-first donde sea posible (agenda del día cacheada).
+- Textos grandes (body 16px mínimo) para lectura rápida.
 
 ---
 
@@ -11,12 +22,17 @@
 
 Basado en recomendaciones de `ui-ux-pro-max` adaptadas a la identidad Skarbarber:
 
-- **Paleta:** mantenemos negro (#000/#0a0a0a) + gold (#c4a462) como en `/reservar`. Descartamos la sugerencia pink/blue del skill — la identidad dorada ya está establecida.
-- **Tipografía:** Playfair Display (títulos) + Inter (UI/body). Ya cargadas globalmente. Descartamos Fira Sans del skill por cohesión con la parte pública.
-- **Estilo:** dark mode OLED + glassmorphism sutil (ya tenemos `.edge-card`). WCAG AA mínimo para texto.
-- **Iconos:** `lucide-react` (ya instalado). Stroke 1.5, tamaño token (sm=16, md=20, lg=24).
-- **Layout móvil-first:** bottom nav (4 items máx), safe-areas, pulgar-friendly. Sidebar en desktop (≥1024px).
-- **Gráficos:** ocupación por día (barras horizontales), KPIs como cards numéricas. Recharts o visx (decisión al llegar a Fase 4).
+- **Logo:** `public/gorila-logotipo 2.jpeg` (gorila boxeador con lema *Familia · Respeto · Humildad*). Es el logo del equipo, más street que el elegante de `/reservar`. Se usa en:
+  - Splash / login.
+  - Header compacto del dashboard (versión reducida, círculo 36-40px).
+  - Icono PWA.
+  Como el fondo del logo es ya negro puro, encaja natural sobre el fondo del dashboard sin bordes.
+- **Paleta:** negro (#000/#0a0a0a) + gold (#c4a462) como en `/reservar`. Descartamos la sugerencia pink/blue del skill.
+- **Tipografía:** Playfair Display (títulos) + Inter (UI/body). Ya cargadas globalmente. La tipografía gótica del logo queda solo como asset, no se reutiliza en UI.
+- **Estilo:** dark mode OLED + glassmorphism sutil (ya tenemos `.edge-card`). WCAG AA mínimo. Más denso y funcional que `/reservar` — aquí el barbero trabaja, no admira.
+- **Iconos:** `lucide-react`. Stroke 1.5, tokens sm=20, md=24, lg=28 (un poco más grandes que en web estándar por uso con manos).
+- **Layout:** mobile-first puro. Bottom nav (4 items), FAB para "nueva cita", safe-areas top/bottom, content padding 16px lateral. Sidebar desktop es bonus.
+- **Gráficos:** ocupación por día (barras horizontales), KPIs como cards numéricas. Recharts o visx (decisión al llegar a Fase 5).
 
 ---
 
@@ -47,14 +63,25 @@ src/app/(dashboard)/
 
 ## Fases
 
-### Fase 0 — Preparar shell (1 sesión)
+### Fase 0 — Preparar shell mobile (1 sesión)
 
-- [ ] Resolver conflicto de rutas `/` (decidir: `/` público → `/reservar` + `/agenda` como home admin, o mover dashboard a `/admin`).
+- [ ] Resolver conflicto de rutas `/` (ver sección "Arquitectura de rutas").
 - [ ] Rediseñar `layout.tsx` del grupo dashboard con identidad gold + Playfair.
-- [ ] Header: logo compacto + usuario logueado + botón logout.
-- [ ] Bottom nav móvil (4 items): Agenda · Clientes · Servicios · Config.
-- [ ] Sidebar desktop con mismos 4 items.
-- [ ] Componentes base compartidos: `GlassPanel`, `GoldBadge`, `StatCard`, `DataTable`, `EmptyState`.
+- [ ] Header compacto: logo gorila (36px circular) + título página + botón avatar/logout.
+- [ ] Bottom nav móvil fijo (4 items con icono + label): Agenda · Clientes · Servicios · Config.
+  - Fondo glass con blur, safe-area bottom inset.
+  - Estado activo con subrayado gold + icon filled.
+- [ ] FAB bottom-right (solo en Agenda): gradiente gold, sombra, icon `Plus`.
+- [ ] Sidebar desktop (≥1024px) con mismos 4 items (bonus).
+- [ ] Componentes base compartidos:
+  - `AppShell` — wrapper con header + content + bottom nav
+  - `PageHeader` — título + acciones contextuales
+  - `GlassPanel` — card base glassmorphism
+  - `GoldBadge` — badge con acento gold (estados)
+  - `StatCard` — KPI card con número grande + label
+  - `ListItem` — item de lista tap-friendly con left icon/avatar + content + chevron
+  - `EmptyState` — mensaje vacío con icono + CTA
+  - `ActionSheet` — bottom sheet modal para acciones
 
 ### Fase 1 — Agenda (core)
 
