@@ -2,7 +2,7 @@
 
 > Documento vivo. Se actualiza al cerrar cada tarea. Si se pierde el contexto de sesión, Claude lee este fichero para retomar.
 
-**Última actualización:** 2026-04-25 (Fase 5 completa — KPIs / Métricas)
+**Última actualización:** 2026-04-25 (Fase 6.1 PWA completa — manifest + iconos + SW offline + install prompt)
 
 ---
 
@@ -22,13 +22,43 @@
 - **Panel admin Fase 4 Servicios completa**: CRUD completo con bottom sheet (nombre/duración/precio/activo/orden), toggle dorado iOS-style, eliminar con confirmación inline, server actions `listarServicios` + `crearServicio` + `actualizarServicio` + `eliminarServicio`.
 - **Panel admin Fase 4 Config completa**: `/panel/config` con `NegocioForm` (nombre/teléfono/dirección) + `HorarioEditor` de 7 días con tramos múltiples (toggle abierto/cerrado, inputs time, hasta 3 tramos por día, default 10-14 / 16-20) + `EmpleadosAdminList` con RBAC (propietario edita a todos, barbero solo su propio perfil) + `EmpleadoEditSheet` (nombre/teléfono/avatar/activo). Server actions `getNegocio`, `actualizarNegocio`, `listarEmpleados`, `actualizarEmpleado`, `getUsuarioActual` con `requirePropietario`. Migración `003_negocio_update_policy` añade RLS UPDATE para propietario; updates blindados con `.select("id")` para detectar 0 filas afectadas.
 - **Panel admin Fase 5 Métricas completa**: `/panel/metricas` (5º item del bottom nav) con 4 KPI cards (citas hoy / semana / ingresos mes / clientes nuevos) + barras CSS de ocupación semanal por día + Top 5 clientes (por nº citas y total gastado) + Top 5 servicios del mes (veces vendido + ingresos). Ingresos del mes solo visibles para propietario (`null` para barbero, mostrado como "—"). Server actions `metricas.ts`: `getKpis`, `getOcupacionSemanal`, `getTopClientes`, `getTopServiciosMes`.
-- **Cards `/reservar` pulidas**: `.edge-card` rediseñada con wash dorado cálido + hairlines luminosos + variantes proper (`--solid` / `--subtle`) + glint de hover; `StepHeading` compartido unifica los headers; ProgressBar con gradient extendido y ring activo.
+- **Cards `/reservar` pulidas**: `.edge-card` rediseñada con wash dorado cálido + lateral warm glints + hairlines luminosos top/bottom + variantes (`--solid` / `--subtle`) + glint de hover; nueva primitiva `.edge-tile` (con variante `--selected` en gradiente dorado) unifica botones día/hora con el lenguaje de las cards; `StepHeading` con rule extendido (88px) y dot dorado luminoso; padding/spacing armonizado en todos los steps (Landing, Barbero, Servicio, Día, Hora, Datos, Confirmación); ProgressBar con gradient extendido y ring activo.
 - RPC `crear_reserva_publica` (SECURITY DEFINER) resuelve limitaciones RLS del flujo anónimo.
 - Middleware protege `/panel/*`; resto público.
 - Preview desplegado en Vercel desde rama `feature/reservar-design`.
 - Usuarios test:
   - `david.olid92@gmail.com` — propietario — pass `SkarTest2026!`
   - `test@skarbarber.local` — barbero
+
+---
+
+## Camino crítico para entregar a Raúl
+
+> Lo mínimo para sustituir la ventana de mantenimiento y dejar la app operativa en manos del cliente.
+
+### Bloqueado por Raúl (necesitamos info suya)
+- [ ] Servicios y precios definitivos (lista cerrada).
+- [ ] Política de cancelación (antelación mínima, sí/no).
+- [ ] Teléfonos definitivos de Raúl y Darío (perfil + WhatsApp recordatorios).
+- [ ] Fotos reales para `empleados.avatar_url` (Raúl + Darío).
+- [ ] Dominio: `skarbarber.com` o `.es` — comprar (~12 €/año).
+
+### Técnico pendiente (lo hacemos nosotros)
+- [ ] **Crear usuarios reales** en Supabase Auth (Raúl propietario, Darío barbero) y poblar fila `empleados`.
+- [ ] **Actualizar seed** con servicios/precios reales una vez confirmados.
+- [ ] **Constraint DB anti doble reserva** (trigger sobre `citas` que verifique solapamiento por barbero) — protege la carrera entre `/reservar` público y `crearCitaManual` admin.
+- [x] **Fase 6 — PWA**: `manifest.ts`, iconos generados, service worker offline shell, install prompt con cooldown.
+- [ ] **Fase 6 — Push al barbero** en nueva reserva (Supabase Realtime + Notification API).
+- [ ] **Email transaccional** mínimo: confirmación al cliente al reservar (Brevo free o Resend). Email al barbero opcional.
+- [ ] **Decisión formato teléfono** (libre vs `+34` forzado) y aplicar regex en `/reservar` y panel.
+- [ ] **QA end-to-end** en preview: reserva pública + alta manual + cambios de horario + métricas con datos reales.
+- [ ] **Merge** `feature/reservar-design` → `main` y apuntar dominio a Vercel (sustituye la ventana de mantenimiento).
+
+### Diferible post-entrega
+- Recordatorios WhatsApp (Fase 3 — necesita verificación WhatsApp Business + Twilio).
+- Editar cita ya creada (cambiar hora/servicio) — Fase 1.5.
+- Link público de cancelación (`/cancelar/[token]`).
+- "Añadir a calendario" (.ics / Google Calendar) en confirmación.
 
 ---
 
@@ -118,11 +148,14 @@
 - [x] Top 5 clientes (por nº citas + total gastado) + Top 5 servicios del mes (veces vendido + ingresos).
 - [x] RBAC: ingresos del mes solo visible para propietario.
 
-**Fase 6 — PWA + notificaciones** ← siguiente
-- [ ] `manifest.json` con `start_url: "/panel"` + iconos gorila.
-- [ ] Service worker básico (offline shell).
-- [ ] Install prompt móvil.
-- [ ] Push al barbero en nueva reserva (Supabase Realtime).
+**Fase 6 — PWA + notificaciones**
+- [x] `app/manifest.ts` tipado con `MetadataRoute.Manifest` (start_url `/panel`, theme `#0a0a0a`, shortcuts a Agenda/Stats).
+- [x] Iconos PWA generados desde `logo-2.png` con script `scripts/generate-pwa-icons.mjs` (192 / 512 / maskable-512 / apple-touch-180 / favicon-32+64).
+- [x] `viewport` exportado en `layout.tsx` con `themeColor`, `colorScheme: dark`, `viewportFit: cover` + meta `appleWebApp` + `formatDetection.telephone:false`.
+- [x] Service worker `public/sw.js` con cache versionado: HTML network-first → fallback `/offline.html`, assets estáticos stale-while-revalidate, passthrough para Supabase / `/api/*` / `/_next/data/`.
+- [x] Página `public/offline.html` con estética del brand (gold gradient + Playfair).
+- [x] `PWAInstallBridge` (cliente) registra el SW solo en producción y muestra un banner glass que captura `beforeinstallprompt`, con cooldown de 14 días al descartar.
+- [ ] Push al barbero en nueva reserva (Supabase Realtime + Notification API). ← siguiente
 
 ### Infra
 - [ ] Merge `feature/reservar-design` → `main` para sustituir ventana de mantenimiento en producción.
