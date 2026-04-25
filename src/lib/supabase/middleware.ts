@@ -33,14 +33,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Public routes that don't require auth
-  const publicPaths = ["/login", "/reservar"];
+  // Only /panel/* requires auth. Everything else is public.
   const pathname = request.nextUrl.pathname;
-  const isPublicPath =
-    pathname === "/" ||
-    publicPaths.some((path) => pathname.startsWith(path));
+  const isProtected = pathname.startsWith("/panel");
 
-  if (!user && !isPublicPath) {
+  if (isProtected && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

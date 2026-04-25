@@ -2,19 +2,29 @@
 
 > Documento vivo. Se actualiza al cerrar cada tarea. Si se pierde el contexto de sesión, Claude lee este fichero para retomar.
 
-**Última actualización:** 2026-04-23
+**Última actualización:** 2026-04-25 (Fase 5 completa — KPIs / Métricas)
 
 ---
 
 ## Estado actual
 
 - Ventana de mantenimiento desplegada en Vercel (rama `maintenance`) y enlazada desde Google Business Profile.
-- Proyecto Next.js 16 inicializado con Supabase, proxy de auth, páginas base (`/login`, `/(dashboard)`, `/reservar`).
+- Proyecto Next.js 16 inicializado con Supabase, proxy de auth, páginas base (`/login`, `/panel`, `/reservar`).
 - Base de datos Supabase operativa (proyecto `xuvylhymklzswesjeskm`), MCP conectado globalmente.
 - Esquema inicial aplicado: `negocio`, `empleados`, `clientes`, `servicios`, `citas`, `recordatorios` + RLS.
 - Seed aplicado: 1 negocio (Skarbarber) + 4 servicios.
 - Flujo público `/reservar` completo (7 pasos) funcionando.
+- **Cards `/reservar` rediseñadas**: glass refinado + Playfair en títulos con gradient dorado en `<em>` + hairlines editoriales + sombras multicapa para armonizar con silk bg animado.
+- **Panel admin `/panel` Fase 0 completa**: shell mobile-first con header gorila (36px), bottom nav 4 items, agenda del día con StatCards, lista de citas, efecto `pulse-gold` en siguiente cita, FAB con shimmer.
+- **Panel admin Fase 1 Agenda core completa**: navegador de fechas con chip "Hoy", filtro por barbero (pill tabs), bottom sheet de detalle con acciones (completar/no-vino/cancelar), tap-to-call + WhatsApp, estados visuales diferenciados por estado de cita, server actions `getCitasDelDia` + `actualizarEstadoCita`.
+- **Panel admin Fase 2 Crear cita manual completa**: FAB abre bottom sheet multi-step (barbero → servicio → día → hora → cliente), autocomplete de clientes existentes con debounce, tres tipos de cliente (Buscar / Nuevo / Sin datos), cliente nuevo con upsert por teléfono, server actions `buscarClientes` + `crearCitaManual`.
+- **Panel admin Fase 3 Clientes completa**: listado con búsqueda debounced + ordenado por última visita + contador de citas + total gastado, ficha con avatar + stats (visitas/citas/gastado) + historial cronológico + edición inline (teléfono/email/notas) + eliminación con confirmación, server actions `listarClientes` + `getClienteConHistorial` + `actualizarCliente` + `eliminarCliente`.
+- **Panel admin Fase 4 Servicios completa**: CRUD completo con bottom sheet (nombre/duración/precio/activo/orden), toggle dorado iOS-style, eliminar con confirmación inline, server actions `listarServicios` + `crearServicio` + `actualizarServicio` + `eliminarServicio`.
+- **Panel admin Fase 4 Config completa**: `/panel/config` con `NegocioForm` (nombre/teléfono/dirección) + `HorarioEditor` de 7 días con tramos múltiples (toggle abierto/cerrado, inputs time, hasta 3 tramos por día, default 10-14 / 16-20) + `EmpleadosAdminList` con RBAC (propietario edita a todos, barbero solo su propio perfil) + `EmpleadoEditSheet` (nombre/teléfono/avatar/activo). Server actions `getNegocio`, `actualizarNegocio`, `listarEmpleados`, `actualizarEmpleado`, `getUsuarioActual` con `requirePropietario`. Migración `003_negocio_update_policy` añade RLS UPDATE para propietario; updates blindados con `.select("id")` para detectar 0 filas afectadas.
+- **Panel admin Fase 5 Métricas completa**: `/panel/metricas` (5º item del bottom nav) con 4 KPI cards (citas hoy / semana / ingresos mes / clientes nuevos) + barras CSS de ocupación semanal por día + Top 5 clientes (por nº citas y total gastado) + Top 5 servicios del mes (veces vendido + ingresos). Ingresos del mes solo visibles para propietario (`null` para barbero, mostrado como "—"). Server actions `metricas.ts`: `getKpis`, `getOcupacionSemanal`, `getTopClientes`, `getTopServiciosMes`.
+- **Cards `/reservar` pulidas**: `.edge-card` rediseñada con wash dorado cálido + hairlines luminosos + variantes proper (`--solid` / `--subtle`) + glint de hover; `StepHeading` compartido unifica los headers; ProgressBar con gradient extendido y ring activo.
 - RPC `crear_reserva_publica` (SECURITY DEFINER) resuelve limitaciones RLS del flujo anónimo.
+- Middleware protege `/panel/*`; resto público.
 - Preview desplegado en Vercel desde rama `feature/reservar-design`.
 - Usuarios test:
   - `david.olid92@gmail.com` — propietario — pass `SkarTest2026!`
@@ -54,50 +64,64 @@
 - [ ] Validación de slots a nivel DB (constraint o trigger) para evitar doble reserva en carrera.
 - [ ] Decisión política formato teléfono (+34 o libre).
 
-### Dashboard admin `/(dashboard)`
+### Panel admin `/panel`
 
 > Ver desglose completo en [PLAN-DASHBOARD.md](PLAN-DASHBOARD.md).
 
-**Fase 0 — Shell**
-- [ ] Resolver conflicto de rutas `/` (ver PLAN-DASHBOARD).
-- [ ] Layout dashboard con identidad gold + Playfair + bottom nav móvil + sidebar desktop.
-- [ ] Componentes base: `GlassPanel`, `GoldBadge`, `StatCard`, `DataTable`, `EmptyState`.
+**Fase 0 — Shell mobile-first** ✅
+- [x] Renombrar `(dashboard)` → `panel` (resuelve conflicto de rutas `/`).
+- [x] Middleware protege solo `/panel/*`, resto público.
+- [x] Tokens CSS para efectos street/videogame: `pulse-gold`, `shimmer-cta`, `conic-border`.
+- [x] Componentes base: `PanelCard`, `StatCard`, `ListItem`, `EmptyState`, `PageHeader`, `FabPlus`, `PanelHeader`, `BottomNav`.
+- [x] Layout con backdrop atmosférico (radial gold + líneas scanline), header gorila 36px circular, bottom nav 4 items con indicador dorado.
+- [x] Agenda placeholder con StatCards + lista de citas reales + efecto `pulse-gold` en siguiente cita + badge "Siguiente".
+- [x] Placeholders `/panel/clientes`, `/panel/servicios`, `/panel/config`.
 
-**Fase 1 — Agenda (core)**
-- [ ] Vista día con timeline vertical (tramos mañana/tarde).
-- [ ] Tarjeta glass por cita (hora, cliente, servicio, tap-to-call).
-- [ ] Filtros por empleado (Todos / Raúl / Darío).
-- [ ] Navegación por fechas (swipe + flechas + date picker).
-- [ ] FAB "+ Cita manual".
-- [ ] Estados visuales: confirmada / completada / cancelada.
-- [ ] Sheet de detalle con acciones (editar, cancelar, completar).
-- [ ] Server actions: `getCitasDelDia`, `actualizarCita`, `cancelarCita`.
+**Fase 1 — Agenda (core)** ✅
+- [x] Navegación por fechas (flechas + chip "Hoy" + labels Hoy/Mañana/Ayer).
+- [x] Filtros por empleado (Todos / Raúl / Darío) como pill tabs con gradient dorado activo.
+- [x] Sheet de detalle al tocar cita: completar, cancelar, marcar no-asistió.
+- [x] Estados visuales diferenciados: confirmada (pulse si próxima) / completada (tachado verde) / cancelada (grayscale rojo) / no_asistio (naranja).
+- [x] Tap-to-call / WhatsApp desde la cita.
+- [x] Server actions: `getCitasDelDia`, `actualizarEstadoCita`.
+- [ ] Editar cita (cambiar hora/servicio/barbero) — aplazado a Fase 1.5.
+- [ ] Swipe horizontal para cambiar de día — aplazado.
+- [ ] Timeline vertical con tramos mañana/tarde — opcional.
 
-**Fase 2 — Crear cita manual**
-- [ ] Flow admin multi-step con autocomplete de clientes.
-- [ ] Opción walk-in (cliente sin registrar).
-- [ ] Server action `crearCitaManual`.
+**Fase 2 — Crear cita manual (FAB)** ✅
+- [x] Sheet multi-step al pulsar FAB: barbero → servicio → día → hora → cliente.
+- [x] Autocomplete de clientes existentes con debounce (220ms).
+- [x] Opción walk-in (cliente sin registrar, marcado con sufijo).
+- [x] Opción cliente nuevo (nombre + teléfono + email opcional, upsert por teléfono).
+- [x] Server actions `buscarClientes` + `crearCitaManual`.
+- [x] Validación de slot en servidor antes de insertar (evita carrera con reservas públicas).
 
-**Fase 3 — Clientes**
-- [ ] Listado ordenado por última visita + búsqueda con debounce.
-- [ ] Ficha cliente: historial, total gastado, nota interna.
-- [ ] Acciones: llamar, WhatsApp, nueva cita.
-- [ ] Server actions CRUD clientes.
+**Fase 3 — Clientes** ✅
+- [x] Listado ordenado por última visita + búsqueda con debounce (200ms).
+- [x] Ficha cliente: historial cortes con estados, total gastado, notas internas.
+- [x] Acciones: llamar, WhatsApp directo desde ficha.
+- [x] Edición inline de nombre, teléfono, email, notas.
+- [x] Eliminación con diálogo de confirmación.
+- [x] Server actions `listarClientes`, `getClienteConHistorial`, `actualizarCliente`, `eliminarCliente`.
+- [ ] Nueva cita pre-rellenada desde ficha (prefill) — aplazado a Fase 3.5.
 
-**Fase 4 — Servicios / Empleados / Config**
-- [ ] CRUD servicios (nombre, duración, precio, activo).
-- [ ] CRUD empleados (solo owner).
-- [ ] Editor de horario laboral por día.
-- [ ] Datos fiscales negocio.
+**Fase 4 — Servicios / Empleados / Config** ✅
+- [x] CRUD servicios (nombre, duración, precio, activo, orden) con sheet + confirmación de borrado.
+- [x] Server actions `admin.ts` con RBAC (`requireUser`, `requirePropietario`, `getRolUsuario`, `getUsuarioActual`).
+- [x] Página `/panel/config` con editor de horario laboral por día (toggle abierto/cerrado + hasta 3 tramos).
+- [x] Datos del negocio (nombre/teléfono/dirección) con formulario dedicado y estado `readOnly` para barbero.
+- [x] Edición de empleados desde config (propietario edita a todos + activo; barbero solo su propio perfil sin activo).
 
-**Fase 5 — KPIs (opcional MVP)**
-- [ ] 4 KPI cards (hoy, semana, ingresos mes, clientes nuevos).
-- [ ] Gráfico ocupación semanal.
-- [ ] Top clientes + Top servicios.
+**Fase 5 — KPIs** ✅
+- [x] 4 KPI cards (hoy, semana, ingresos mes, clientes nuevos) en `/panel/metricas`.
+- [x] Gráfico ocupación semanal (barras CSS, 7 días lun-dom, % sobre capacidad total).
+- [x] Top 5 clientes (por nº citas + total gastado) + Top 5 servicios del mes (veces vendido + ingresos).
+- [x] RBAC: ingresos del mes solo visible para propietario.
 
-**Fase 6 — PWA + notificaciones**
-- [ ] `manifest.json` + iconos.
-- [ ] Service worker básico.
+**Fase 6 — PWA + notificaciones** ← siguiente
+- [ ] `manifest.json` con `start_url: "/panel"` + iconos gorila.
+- [ ] Service worker básico (offline shell).
+- [ ] Install prompt móvil.
 - [ ] Push al barbero en nueva reserva (Supabase Realtime).
 
 ### Infra
