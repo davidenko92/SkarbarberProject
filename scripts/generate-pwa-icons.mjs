@@ -13,7 +13,7 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..");
-const SOURCE = resolve(ROOT, "public/logo-2.png");
+const SOURCE = resolve(ROOT, "public/gorila-logotipo 2.jpeg");
 const OUT = resolve(ROOT, "public/icons");
 
 const BG = { r: 10, g: 10, b: 10, alpha: 1 };
