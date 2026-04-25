@@ -9,7 +9,7 @@ interface StepLandingProps {
 export function StepLanding({ onStart }: StepLandingProps) {
   return (
     <div className="animate-step-in flex min-h-dvh flex-col items-center justify-between gap-5 py-4">
-      <GlassCard className="flex w-full flex-col items-center rounded-[2rem] px-6 pb-7 pt-6 text-center">
+      <GlassCard className="flex w-full flex-col items-center rounded-[2rem] px-7 pb-8 pt-7 text-center">
         <div className="-mx-2 -mb-2 -mt-4 aspect-[5/4] w-[calc(100%+1rem)]">
           <Image
             src="/icono-transparente.png"
@@ -39,7 +39,7 @@ export function StepLanding({ onStart }: StepLandingProps) {
         <GoldButton onClick={onStart}>Reservar cita</GoldButton>
       </GlassCard>
 
-      <GlassCard variant="solid" className="w-full rounded-[1.75rem] px-7 py-6">
+      <GlassCard variant="solid" className="w-full rounded-[1.75rem] px-7 py-7">
         <div className="grid gap-5 text-sm">
           <InfoRow label="Teléfono">
             <a href="tel:623404772" className="hover:text-gold">

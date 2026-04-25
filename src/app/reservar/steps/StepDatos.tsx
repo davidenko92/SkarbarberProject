@@ -56,7 +56,7 @@ export function StepDatos({
         }
       />
 
-      <GlassCard className="px-6 py-8">
+      <GlassCard className="px-7 py-9">
         <div className="space-y-7">
           <Field
             label="Nombre"
@@ -90,7 +90,7 @@ export function StepDatos({
               value={datos.notas}
               onChange={(e) => onChange({ notas: e.target.value })}
               rows={3}
-              className="w-full resize-none rounded-2xl border border-gold/25 bg-black/35 p-4 text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/30 focus:border-gold/60 focus:bg-black/45 focus:shadow-[0_0_0_1px_rgba(196,164,98,0.2),0_8px_24px_-8px_rgba(196,164,98,0.25)]"
+              className="edge-tile w-full resize-none rounded-2xl p-4 text-[15px] text-white outline-none placeholder:text-white/30 focus:border-gold/65 focus:shadow-[0_0_0_1px_rgba(196,164,98,0.25),0_10px_28px_-10px_rgba(196,164,98,0.3),inset_0_1px_0_rgba(255,240,210,0.12)]"
             />
           </div>
         </div>

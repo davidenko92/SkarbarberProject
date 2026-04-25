@@ -137,11 +137,10 @@ function SlotGrid({ slots, seleccionada, onSelect }: SlotGridProps) {
             key={h}
             type="button"
             onClick={() => onSelect(h)}
-            className={
-              activo
-                ? "rounded-full bg-gradient-to-b from-gold-light via-gold to-gold-dark py-3 text-[15px] font-semibold tracking-wide text-black shadow-[0_0_26px_rgba(196,164,98,0.5),inset_0_1px_0_rgba(255,255,255,0.4)]"
-                : "rounded-full border border-gold/25 bg-black/35 py-3 text-[15px] font-medium tracking-wide text-white/90 backdrop-blur-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-gold/65 hover:bg-black/55 hover:text-gold-light hover:shadow-[0_8px_20px_-8px_rgba(196,164,98,0.45)]"
-            }
+            className={[
+              "edge-tile rounded-full py-3 font-serif text-[16px] font-normal leading-none tracking-wide",
+              activo ? "edge-tile--selected" : "text-white/90",
+            ].join(" ")}
           >
             {h}
           </button>

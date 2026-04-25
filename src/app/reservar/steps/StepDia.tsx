@@ -169,33 +169,25 @@ export function StepDia({
                     : undefined
               }
               className={[
-                "relative flex h-[76px] flex-col items-center justify-center rounded-2xl border backdrop-blur-sm transition-all duration-300",
-                seleccionado
-                  ? "border-gold bg-gradient-to-b from-gold-light via-gold to-gold-dark text-black shadow-[0_0_26px_rgba(196,164,98,0.5),inset_0_1px_0_rgba(255,255,255,0.4)]"
-                  : "border-gold/20 bg-black/35 text-white hover:-translate-y-[2px] hover:border-gold/60 hover:bg-black/55 hover:shadow-[0_8px_20px_-6px_rgba(196,164,98,0.4)]",
-                disabled &&
-                  "!border-white/10 !bg-black/20 !text-white/35 cursor-not-allowed hover:!border-white/10 hover:!bg-black/20 hover:!translate-y-0 hover:!shadow-none",
+                "edge-tile relative flex h-[78px] flex-col items-center justify-center rounded-2xl",
+                seleccionado && "edge-tile--selected",
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
               <span
                 className={[
-                  "text-[9.5px] font-semibold tracking-[0.18em]",
-                  seleccionado
-                    ? "text-black/75"
-                    : disabled
-                      ? "text-white/45"
-                      : "text-white/55",
+                  "text-[9.5px] font-semibold tracking-[0.22em]",
+                  seleccionado ? "text-black/70" : "text-current opacity-65",
                 ].join(" ")}
               >
                 {DIAS_CORTOS[d.dow]}
               </span>
               <span
                 className={[
-                  "text-xl font-medium",
+                  "mt-0.5 font-serif text-[22px] font-normal leading-none",
                   disabled &&
-                    "line-through decoration-white/60 decoration-[1.5px]",
+                    "line-through decoration-white/45 decoration-[1.5px]",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -203,7 +195,7 @@ export function StepDia({
                 {d.numero}
               </span>
               {seleccionado && (
-                <span className="pointer-events-none absolute inset-x-5 bottom-1 h-px bg-black/30" />
+                <span className="pointer-events-none absolute inset-x-6 bottom-1.5 h-px bg-black/35" />
               )}
             </button>
           );

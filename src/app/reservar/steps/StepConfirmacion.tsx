@@ -48,7 +48,7 @@ export function StepConfirmacion({
         <div className="hairline-short mx-auto mt-4" />
       </div>
 
-      <GlassCard className="w-full px-7 py-8">
+      <GlassCard className="w-full px-8 py-9">
         <dl className="divide-y divide-gold/10">
           {barbero && <Row label="Barbero" value={barbero.nombre} />}
           {servicio && (
@@ -103,7 +103,7 @@ function Row({
   capitalize?: boolean;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-4 first:pt-0 last:pb-0">
+    <div className="flex items-baseline justify-between gap-4 py-[18px] first:pt-0 last:pb-0">
       <span className="eyebrow">{label}</span>
       <span
         className={[
