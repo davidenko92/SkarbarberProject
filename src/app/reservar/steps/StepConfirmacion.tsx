@@ -42,13 +42,13 @@ export function StepConfirmacion({
 
       <div className="text-center">
         <span className="eyebrow">Confirmada</span>
-        <h1 className="display-serif mt-3 text-[40px] text-white">
+        <h1 className="display-serif mt-4 text-[clamp(38px,10vw,44px)] text-white">
           Cita <em>reservada</em>
         </h1>
         <div className="hairline-short mx-auto mt-4" />
       </div>
 
-      <GlassCard className="w-full rounded-[1.75rem] px-7 py-7">
+      <GlassCard className="w-full px-7 py-8">
         <dl className="divide-y divide-gold/10">
           {barbero && <Row label="Barbero" value={barbero.nombre} />}
           {servicio && (
@@ -108,7 +108,7 @@ function Row({
       <span
         className={[
           "text-right",
-          strong ? "text-2xl font-light tracking-tight text-gold" : "text-[17px] font-light text-white/95",
+          strong ? "font-serif text-[26px] leading-none tracking-tight text-gold drop-shadow-[0_0_16px_rgba(196,164,98,0.3)]" : "text-[17px] font-light text-white/95",
           capitalize ? "capitalize" : "",
         ]
           .filter(Boolean)

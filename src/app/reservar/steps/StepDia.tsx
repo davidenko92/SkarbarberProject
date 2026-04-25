@@ -4,6 +4,7 @@ import { getDiasLlenos } from "@/lib/actions/reservas";
 import type { HorarioLaboral } from "@/lib/types";
 import { useEffect, useMemo, useState } from "react";
 import { GoldButton } from "../components/GoldButton";
+import { StepHeading } from "../components/StepHeading";
 
 interface StepDiaProps {
   horario: HorarioLaboral;
@@ -91,14 +92,16 @@ export function StepDia({
 
   return (
     <div className="animate-step-in flex flex-1 flex-col">
-      <header className="mb-8">
-        <span className="eyebrow">Paso 03 · Día</span>
-        <h1 className="display-serif mt-3 text-[44px] text-white">
-          ¿Qué día
-          <br />
-          te <em>viene bien</em>?
-        </h1>
-      </header>
+      <StepHeading
+        eyebrow="Paso 03 · Día"
+        title={
+          <>
+            ¿Qué día
+            <br />
+            te <em>viene bien</em>?
+          </>
+        }
+      />
 
       <div className="mb-5 flex items-center justify-between">
         <button
@@ -166,12 +169,12 @@ export function StepDia({
                     : undefined
               }
               className={[
-                "relative flex h-[74px] flex-col items-center justify-center rounded-xl border transition-all",
+                "relative flex h-[76px] flex-col items-center justify-center rounded-2xl border backdrop-blur-sm transition-all duration-300",
                 seleccionado
-                  ? "border-gold bg-gradient-to-b from-gold to-gold-dark text-black shadow-[0_0_22px_rgba(196,164,98,0.4)]"
-                  : "border-gold/15 bg-black/30 text-white hover:-translate-y-[1px] hover:border-gold/55 hover:bg-black/50 hover:shadow-[0_0_18px_-6px_rgba(196,164,98,0.35)]",
+                  ? "border-gold bg-gradient-to-b from-gold-light via-gold to-gold-dark text-black shadow-[0_0_26px_rgba(196,164,98,0.5),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                  : "border-gold/20 bg-black/35 text-white hover:-translate-y-[2px] hover:border-gold/60 hover:bg-black/55 hover:shadow-[0_8px_20px_-6px_rgba(196,164,98,0.4)]",
                 disabled &&
-                  "!border-white/10 !bg-black/20 !text-white/40 cursor-not-allowed hover:!border-white/10 hover:!bg-black/20 hover:!translate-y-0 hover:!shadow-none",
+                  "!border-white/10 !bg-black/20 !text-white/35 cursor-not-allowed hover:!border-white/10 hover:!bg-black/20 hover:!translate-y-0 hover:!shadow-none",
               ]
                 .filter(Boolean)
                 .join(" ")}

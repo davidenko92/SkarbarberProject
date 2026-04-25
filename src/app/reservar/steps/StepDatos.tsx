@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { BookingDatosCliente } from "../booking-reducer";
 import { GlassCard } from "../components/GlassCard";
 import { GoldButton } from "../components/GoldButton";
+import { StepHeading } from "../components/StepHeading";
 
 interface StepDatosProps {
   datos: BookingDatosCliente;
@@ -46,14 +47,16 @@ export function StepDatos({
       onSubmit={handleSubmit}
       className="animate-step-in flex flex-1 flex-col"
     >
-      <header className="mb-8">
-        <span className="eyebrow">Paso 05 · Datos</span>
-        <h1 className="display-serif mt-3 text-[44px] text-white">
-          Tus <em>datos</em>
-        </h1>
-      </header>
+      <StepHeading
+        eyebrow="Paso 05 · Datos"
+        title={
+          <>
+            Tus <em>datos</em>
+          </>
+        }
+      />
 
-      <GlassCard className="rounded-[1.75rem] px-6 py-7">
+      <GlassCard className="px-6 py-8">
         <div className="space-y-7">
           <Field
             label="Nombre"
@@ -79,7 +82,7 @@ export function StepDatos({
             autoComplete="email"
           />
           <div>
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.28em] text-gold">
+            <label className="mb-2.5 block text-[10px] font-semibold uppercase tracking-[0.34em] text-gold/90">
               Notas (opcional)
             </label>
             <textarea
@@ -87,7 +90,7 @@ export function StepDatos({
               value={datos.notas}
               onChange={(e) => onChange({ notas: e.target.value })}
               rows={3}
-              className="w-full resize-none rounded-xl border border-gold/25 bg-black/30 p-4 text-[15px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-gold/60 focus:shadow-[0_0_0_1px_rgba(196,164,98,0.2)]"
+              className="w-full resize-none rounded-2xl border border-gold/25 bg-black/35 p-4 text-[15px] text-white outline-none transition-all duration-300 placeholder:text-white/30 focus:border-gold/60 focus:bg-black/45 focus:shadow-[0_0_0_1px_rgba(196,164,98,0.2),0_8px_24px_-8px_rgba(196,164,98,0.25)]"
             />
           </div>
         </div>
@@ -156,7 +159,7 @@ function Field({
 }: FieldProps) {
   return (
     <div>
-      <label className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.28em] text-gold">
+      <label className="mb-2.5 block text-[10px] font-semibold uppercase tracking-[0.34em] text-gold/90">
         {label}
       </label>
       <input

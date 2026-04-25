@@ -3,6 +3,7 @@
 import { getSlotsDisponibles } from "@/lib/actions/reservas";
 import { useEffect, useState } from "react";
 import { GoldButton } from "../components/GoldButton";
+import { StepHeading } from "../components/StepHeading";
 
 interface StepHoraProps {
   empleadoId: string;
@@ -54,15 +55,15 @@ export function StepHora({
 
   return (
     <div className="animate-step-in flex flex-1 flex-col">
-      <header className="mb-8">
-        <span className="eyebrow">Paso 04 · Hora</span>
-        <h1 className="display-serif mt-3 text-[44px] text-white">
-          ¿A qué <em>hora</em>?
-        </h1>
-        <p className="mt-3 text-[13px] capitalize tracking-[0.1em] text-white/60">
-          {fechaLegible}
-        </p>
-      </header>
+      <StepHeading
+        eyebrow="Paso 04 · Hora"
+        title={
+          <>
+            ¿A qué <em>hora</em>?
+          </>
+        }
+        meta={fechaLegible}
+      />
 
       {slots === null && (
         <p className="py-8 text-center text-[13px] uppercase tracking-[0.18em] text-white/50">
@@ -138,8 +139,8 @@ function SlotGrid({ slots, seleccionada, onSelect }: SlotGridProps) {
             onClick={() => onSelect(h)}
             className={
               activo
-                ? "rounded-full bg-gradient-to-b from-gold to-gold-dark py-3 text-[15px] font-semibold tracking-wide text-black shadow-[0_0_22px_rgba(196,164,98,0.45)]"
-                : "rounded-full border border-gold/20 bg-black/30 py-3 text-[15px] font-medium tracking-wide text-white/90 transition-all duration-200 hover:-translate-y-[1px] hover:border-gold/60 hover:bg-black/55 hover:text-gold-light hover:shadow-[0_6px_18px_-8px_rgba(196,164,98,0.4)]"
+                ? "rounded-full bg-gradient-to-b from-gold-light via-gold to-gold-dark py-3 text-[15px] font-semibold tracking-wide text-black shadow-[0_0_26px_rgba(196,164,98,0.5),inset_0_1px_0_rgba(255,255,255,0.4)]"
+                : "rounded-full border border-gold/25 bg-black/35 py-3 text-[15px] font-medium tracking-wide text-white/90 backdrop-blur-sm transition-all duration-300 hover:-translate-y-[2px] hover:border-gold/65 hover:bg-black/55 hover:text-gold-light hover:shadow-[0_8px_20px_-8px_rgba(196,164,98,0.45)]"
             }
           >
             {h}
