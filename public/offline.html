@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <title>Sin conexión · Skarbarber</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --gold: #c4a462;
+        --gold-light: #e5c171;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0a0a0a;
+        color: #fff;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        min-height: 100dvh;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        gap: 1.75rem;
+        background:
+          radial-gradient(
+            120% 80% at 50% -10%,
+            rgba(196, 164, 98, 0.18),
+            transparent 60%
+          ),
+          #0a0a0a;
+      }
+      .logo {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        background:
+          radial-gradient(
+            70% 70% at 50% 0%,
+            rgba(229, 193, 113, 0.4) 0%,
+            rgba(196, 164, 98, 0.12) 60%,
+            transparent 100%
+          ),
+          #111;
+        border: 1px solid rgba(196, 164, 98, 0.35);
+        display: grid;
+        place-items: center;
+      }
+      .logo img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: var(--gold-light);
+        font-weight: 600;
+      }
+      h1 {
+        font-family: "Playfair Display", "Iowan Old Style", Georgia, serif;
+        font-weight: 400;
+        font-size: clamp(34px, 9vw, 44px);
+        line-height: 1.05;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      h1 em {
+        font-style: italic;
+        background: linear-gradient(180deg, #f4d89a 0%, #c4a462 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      p {
+        max-width: 32ch;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.55;
+        margin: 0;
+      }
+      button {
+        appearance: none;
+        cursor: pointer;
+        background: linear-gradient(180deg, #e5c171, #c4a462 50%, #aa842a);
+        color: #0a0a0a;
+        border: 1px solid #9e7a18;
+        padding: 0.85rem 1.6rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.04em;
+        box-shadow: 0 8px 22px -10px rgba(229, 193, 113, 0.6);
+      }
+      button:active {
+        transform: scale(0.97);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">
+      <img src="/icons/icon-192.png" alt="Skarbarber" />
+    </div>
+    <div>
+      <span class="eyebrow">Sin conexión</span>
+      <h1>Volvemos en cuanto haya <em>red</em></h1>
+    </div>
+    <p>No hemos podido contactar con el servidor. Revisa tu conexión y vuelve a intentarlo.</p>
+    <button onclick="location.reload()">Reintentar</button>
+  </body>
+</html>

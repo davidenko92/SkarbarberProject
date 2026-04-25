@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PanelHeader } from "./components/PanelHeader";
 import { BottomNav } from "./components/BottomNav";
+import { PWAInstallBridge } from "./components/PWAInstallBridge";
 
 export default async function PanelLayout({
   children,
@@ -45,6 +46,7 @@ export default async function PanelLayout({
           {children}
         </main>
         <BottomNav />
+        <PWAInstallBridge />
       </div>
     </div>
   );
