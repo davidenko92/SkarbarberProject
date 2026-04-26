@@ -2,7 +2,7 @@
 
 > Documento vivo. Se actualiza al cerrar cada tarea. Si se pierde el contexto de sesión, Claude lee este fichero para retomar.
 
-**Última actualización:** 2026-04-25 (Fase 6.1 PWA completa — manifest + iconos + SW offline + install prompt)
+**Última actualización:** 2026-04-26 (login server action + PWA fallback iOS + icono gorila + constraint anti doble-reserva + email transaccional Gmail SMTP)
 
 ---
 
@@ -23,6 +23,11 @@
 - **Panel admin Fase 4 Config completa**: `/panel/config` con `NegocioForm` (nombre/teléfono/dirección) + `HorarioEditor` de 7 días con tramos múltiples (toggle abierto/cerrado, inputs time, hasta 3 tramos por día, default 10-14 / 16-20) + `EmpleadosAdminList` con RBAC (propietario edita a todos, barbero solo su propio perfil) + `EmpleadoEditSheet` (nombre/teléfono/avatar/activo). Server actions `getNegocio`, `actualizarNegocio`, `listarEmpleados`, `actualizarEmpleado`, `getUsuarioActual` con `requirePropietario`. Migración `003_negocio_update_policy` añade RLS UPDATE para propietario; updates blindados con `.select("id")` para detectar 0 filas afectadas.
 - **Panel admin Fase 5 Métricas completa**: `/panel/metricas` (5º item del bottom nav) con 4 KPI cards (citas hoy / semana / ingresos mes / clientes nuevos) + barras CSS de ocupación semanal por día + Top 5 clientes (por nº citas y total gastado) + Top 5 servicios del mes (veces vendido + ingresos). Ingresos del mes solo visibles para propietario (`null` para barbero, mostrado como "—"). Server actions `metricas.ts`: `getKpis`, `getOcupacionSemanal`, `getTopClientes`, `getTopServiciosMes`.
 - **Cards `/reservar` pulidas**: `.edge-card` rediseñada con wash dorado cálido + lateral warm glints + hairlines luminosos top/bottom + variantes (`--solid` / `--subtle`) + glint de hover; nueva primitiva `.edge-tile` (con variante `--selected` en gradiente dorado) unifica botones día/hora con el lenguaje de las cards; `StepHeading` con rule extendido (88px) y dot dorado luminoso; padding/spacing armonizado en todos los steps (Landing, Barbero, Servicio, Día, Hora, Datos, Confirmación); ProgressBar con gradient extendido y ring activo.
+- **Login fix**: migrado a Server Action con `redirect('/panel')` server-side — elimina race condition de cookies que en algunos móviles caía a `/reservar`. `/login` ya autenticado autoredirige a `/panel`.
+- **PWA fallback iOS**: detecta Safari iOS y muestra modal con instrucciones (Compartir → Añadir a pantalla de inicio) ya que iOS no dispara `beforeinstallprompt`. Android Chrome conserva el flujo nativo.
+- **Icono PWA = gorila**: regenerados todos los iconos desde `gorila-logotipo 2.jpeg` con `trim()` del borde negro y ratio interno al 94 %.
+- **Anti doble-reserva DB** (`004_anti_doble_reserva.sql`): `EXCLUDE USING gist` con `tstzrange [)` + `btree_gist` sobre `(empleado_id, rango)` parcial sobre `estado <> 'cancelada'`. RPC `crear_reserva_publica` captura `exclusion_violation` y devuelve `SLOT_OCUPADO`. App mapea a "Esa hora acaba de ocuparse, elige otra". Tested: cita normal ✓, solape ✗, contigua [10:30,11:00) ✓.
+- **Email transaccional**: `nodemailer` + Gmail SMTP. Plantillas HTML con identidad black+gold + Playfair. Envío fire-and-forget tras INSERT exitoso. Cliente recibe confirmación (si dejó email), barbero recibe aviso con datos del cliente. Falla silencioso si las env no están — la reserva se crea igual. Necesita configurar en Vercel: `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `BARBERO_EMAIL_DEFAULT`.
 - RPC `crear_reserva_publica` (SECURITY DEFINER) resuelve limitaciones RLS del flujo anónimo.
 - Middleware protege `/panel/*`; resto público.
 - Preview desplegado en Vercel desde rama `feature/reservar-design`.
@@ -44,15 +49,18 @@
 - [ ] Dominio: `skarbarber.com` o `.es` — comprar (~12 €/año).
 
 ### Técnico pendiente (lo hacemos nosotros)
+- [ ] **Configurar variables Gmail SMTP en Vercel** (David): `GMAIL_USER`, `GMAIL_APP_PASSWORD` (App Password 16 chars con 2FA), `EMAIL_FROM_NAME=Skarbarber`, `BARBERO_EMAIL_DEFAULT=david.olid92@gmail.com` → redeploy → probar reserva real.
 - [ ] **Crear usuarios reales** en Supabase Auth (Raúl propietario, Darío barbero) y poblar fila `empleados`.
 - [ ] **Actualizar seed** con servicios/precios reales una vez confirmados.
-- [ ] **Constraint DB anti doble reserva** (trigger sobre `citas` que verifique solapamiento por barbero) — protege la carrera entre `/reservar` público y `crearCitaManual` admin.
-- [x] **Fase 6 — PWA**: `manifest.ts`, iconos generados, service worker offline shell, install prompt con cooldown.
-- [ ] **Fase 6 — Push al barbero** en nueva reserva (Supabase Realtime + Notification API).
-- [ ] **Email transaccional** mínimo: confirmación al cliente al reservar (Brevo free o Resend). Email al barbero opcional.
+- [x] **Constraint DB anti doble reserva** (`004_anti_doble_reserva.sql`).
+- [x] **Email transaccional** cliente + barbero (Gmail SMTP nodemailer, fire-and-forget).
+- [x] **Fase 6 — PWA**: `manifest.ts`, iconos generados, service worker offline shell, install prompt con cooldown + fallback iOS.
+- [ ] **Acceso barberos discreto** desde `/reservar` (link pequeño en footer hacia `/login`).
 - [ ] **Decisión formato teléfono** (libre vs `+34` forzado) y aplicar regex en `/reservar` y panel.
-- [ ] **QA end-to-end** en preview: reserva pública + alta manual + cambios de horario + métricas con datos reales.
+- [ ] **QA end-to-end** en preview: reserva pública + email + alta manual + cambios de horario + métricas con datos reales.
 - [ ] **Merge** `feature/reservar-design` → `main` y apuntar dominio a Vercel (sustituye la ventana de mantenimiento).
+- [ ] *(diferible post-entrega)* **Fase 6 — Push al barbero** en nueva reserva (Supabase Realtime + Notification API). Aporta poco vs su complejidad en iOS — el email ya cumple ese rol.
+- [ ] *(diferible)* **RPC `get_empleado_email`** (SECURITY DEFINER) para que el email del barbero se lea de `auth.users` cuando haya cuentas reales por barbero (ahora todos van a `BARBERO_EMAIL_DEFAULT`).
 
 ### Diferible post-entrega
 - Recordatorios WhatsApp (Fase 3 — necesita verificación WhatsApp Business + Twilio).
@@ -91,7 +99,7 @@
 - [x] Fix RLS: policy pública de negocio + RPC `citas_ocupadas_del_dia`.
 - [x] Fix RLS: RPC `crear_reserva_publica` para upsert cliente + insert cita.
 - [x] Prueba end-to-end en producción (preview Vercel).
-- [ ] Validación de slots a nivel DB (constraint o trigger) para evitar doble reserva en carrera.
+- [x] Validación de slots a nivel DB (`EXCLUDE USING gist` en migración `004`).
 - [ ] Decisión política formato teléfono (+34 o libre).
 
 ### Panel admin `/panel`
@@ -155,7 +163,9 @@
 - [x] Service worker `public/sw.js` con cache versionado: HTML network-first → fallback `/offline.html`, assets estáticos stale-while-revalidate, passthrough para Supabase / `/api/*` / `/_next/data/`.
 - [x] Página `public/offline.html` con estética del brand (gold gradient + Playfair).
 - [x] `PWAInstallBridge` (cliente) registra el SW solo en producción y muestra un banner glass que captura `beforeinstallprompt`, con cooldown de 14 días al descartar.
-- [ ] Push al barbero en nueva reserva (Supabase Realtime + Notification API). ← siguiente
+- [x] **Fallback iOS Safari**: detección de iOS + modal con instrucciones (Compartir → Añadir a pantalla de inicio) ya que iOS no soporta `beforeinstallprompt`.
+- [x] **Icono = gorila Skar Barber** (regenerado desde `gorila-logotipo 2.jpeg` con `trim()` y ratio 94%).
+- [ ] Push al barbero en nueva reserva (Supabase Realtime + Notification API) — diferible post-entrega; el email ya notifica.
 
 ### Infra
 - [ ] Merge `feature/reservar-design` → `main` para sustituir ventana de mantenimiento en producción.
@@ -173,12 +183,14 @@
 
 ---
 
-## Fase 2 — Emails transaccionales
+## Fase 2 — Emails transaccionales ✅
 
-- [ ] Elegir proveedor (Brevo free sin dominio, o Resend + dominio propio).
-- [ ] Plantilla de confirmación de cita al cliente (HTML estilo negro+dorado).
-- [ ] Email interno al barbero cuando entra nueva reserva.
-- [ ] Disparo desde `crearReserva` tras éxito.
+- [x] Proveedor MVP: Gmail SMTP con `nodemailer` (App Password). Migrar a Resend cuando haya dominio.
+- [x] Plantilla de confirmación de cita al cliente (HTML negro+dorado + Playfair).
+- [x] Email interno al barbero cuando entra nueva reserva (con tap-to-call y mailto cliente).
+- [x] Disparo desde `crearReserva` tras éxito (fire-and-forget, no bloquea UX).
+- [ ] Probar en preview con env vars configuradas en Vercel.
+- [ ] Migrar a dominio propio + Resend cuando se compre el dominio.
 
 ---
 
@@ -229,6 +241,9 @@
 - [AGENTS.md](AGENTS.md) — aviso sobre Next.js 16 (breaking changes).
 - [supabase/migrations/001_initial_schema.sql](supabase/migrations/001_initial_schema.sql) — esquema.
 - [supabase/migrations/002_reserva_publica_rpc.sql](supabase/migrations/002_reserva_publica_rpc.sql) — RPC reserva pública.
+- [supabase/migrations/003_negocio_update_policy.sql](supabase/migrations/003_negocio_update_policy.sql) — RLS UPDATE negocio para propietario.
+- [supabase/migrations/004_anti_doble_reserva.sql](supabase/migrations/004_anti_doble_reserva.sql) — EXCLUDE constraint anti solape + RPC v2.
+- [src/lib/email/](src/lib/email/) — transport Gmail SMTP + plantillas HTML + sender.
 - [supabase/seed.sql](supabase/seed.sql) — datos iniciales.
 - [src/lib/types.ts](src/lib/types.ts) — tipos TS del esquema.
 - [src/lib/supabase/](src/lib/supabase/) — clientes Supabase.
