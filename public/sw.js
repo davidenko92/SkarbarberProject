@@ -7,7 +7,7 @@
  *  - Server actions, Supabase, /api/*: passthrough (siempre red).
  */
 
-const VERSION = "skarbarber-v3";
+const VERSION = "skarbarber-v4";
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const OFFLINE_URL = "/offline.html";
