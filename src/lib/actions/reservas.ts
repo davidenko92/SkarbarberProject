@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { sendReservaEmails } from "@/lib/email/sendReservaEmails";
 import type { Empleado, HorarioLaboral, HorarioTramo, Servicio } from "@/lib/types";
 
 const DIAS_SEMANA: Array<keyof HorarioLaboral> = [
@@ -232,11 +233,19 @@ export async function crearReserva(input: ReservaInput): Promise<ReservaResult> 
   const { empleadoId, servicioId, fecha, hora, cliente } = parsed.data;
   const supabase = await createClient();
 
-  const { data: servicio, error: servicioError } = await supabase
-    .from("servicios")
-    .select("duracion, activo")
-    .eq("id", servicioId)
-    .single();
+  const [{ data: servicio, error: servicioError }, { data: barbero }] =
+    await Promise.all([
+      supabase
+        .from("servicios")
+        .select("nombre, duracion, precio, activo")
+        .eq("id", servicioId)
+        .single(),
+      supabase
+        .from("empleados")
+        .select("nombre")
+        .eq("id", empleadoId)
+        .single(),
+    ]);
 
   if (servicioError || !servicio?.activo) {
     return { success: false, error: "Servicio no disponible" };
@@ -280,6 +289,21 @@ export async function crearReserva(input: ReservaInput): Promise<ReservaResult> 
         : "No se pudo crear la reserva. Inténtalo de nuevo.",
     };
   }
+
+  // Fire-and-forget: el envío de emails no debe bloquear la respuesta al cliente.
+  void sendReservaEmails({
+    clienteNombre: cliente.nombre,
+    clienteTelefono: cliente.telefono,
+    clienteEmail: cliente.email || null,
+    barberoNombre: barbero?.nombre ?? "Skar Barber",
+    barberoEmail: null, // TODO: cuando Raúl/Darío tengan cuenta, leer auth.users.email vía RPC SECURITY DEFINER
+    servicioNombre: servicio.nombre,
+    precio: servicio.precio,
+    inicio,
+    notas: cliente.notas || null,
+  }).catch((err) => {
+    console.error("[reserva] email fallido pero cita creada:", err);
+  });
 
   return { success: true, citaId: citaId as string };
 }
