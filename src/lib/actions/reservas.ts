@@ -270,9 +270,14 @@ export async function crearReserva(input: ReservaInput): Promise<ReservaResult> 
   );
 
   if (rpcError || !citaId) {
+    const raw = rpcError?.message ?? "";
+    const slotConflict =
+      raw.includes("SLOT_OCUPADO") || raw.includes("citas_no_solape_excl");
     return {
       success: false,
-      error: rpcError?.message ?? "No se pudo crear la reserva",
+      error: slotConflict
+        ? "Esa hora acaba de ocuparse. Elige otra, por favor."
+        : "No se pudo crear la reserva. Inténtalo de nuevo.",
     };
   }
 
