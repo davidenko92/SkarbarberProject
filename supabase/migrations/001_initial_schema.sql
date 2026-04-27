@@ -1,159 +1,138 @@
 -- ============================================
--- TABLA: tenants (multi-tenant ready)
+-- TABLA: negocio (datos de la barbería)
 -- ============================================
-CREATE TABLE tenants (
-  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name          TEXT NOT NULL,
-  slug          TEXT UNIQUE NOT NULL,
-  phone         TEXT,
-  address       TEXT,
-  timezone      TEXT DEFAULT 'Europe/Madrid',
-  business_hours JSONB NOT NULL DEFAULT '{
-    "mon": {"open": "09:00", "close": "20:00"},
-    "tue": {"open": "09:00", "close": "20:00"},
-    "wed": {"open": "09:00", "close": "20:00"},
-    "thu": {"open": "09:00", "close": "20:00"},
-    "fri": {"open": "09:00", "close": "20:00"},
-    "sat": {"open": "09:00", "close": "14:00"},
-    "sun": null
-  }'::jsonb,
-  created_at    TIMESTAMPTZ DEFAULT now(),
-  updated_at    TIMESTAMPTZ DEFAULT now()
-);
-
--- ============================================
--- TABLA: profiles (barberos / dueños)
--- ============================================
-CREATE TABLE profiles (
-  id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  full_name   TEXT NOT NULL,
-  role        TEXT NOT NULL DEFAULT 'barber' CHECK (role IN ('owner', 'barber')),
-  phone       TEXT,
-  avatar_url  TEXT,
-  is_active   BOOLEAN DEFAULT true,
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-
--- ============================================
--- TABLA: clients (clientes de la barbería)
--- ============================================
-CREATE TABLE clients (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
-  phone       TEXT,
-  email       TEXT,
-  notes       TEXT,
-  created_at  TIMESTAMPTZ DEFAULT now(),
-  updated_at  TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(tenant_id, phone)
-);
-
--- ============================================
--- TABLA: services (catálogo de servicios)
--- ============================================
-CREATE TABLE services (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  name        TEXT NOT NULL,
-  duration    INTEGER NOT NULL DEFAULT 30,
-  price       DECIMAL(8,2) NOT NULL,
-  is_active   BOOLEAN DEFAULT true,
-  sort_order  INTEGER DEFAULT 0,
-  created_at  TIMESTAMPTZ DEFAULT now()
-);
-
--- ============================================
--- TABLA: appointments (citas)
--- ============================================
-CREATE TABLE appointments (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-  client_id   UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
-  barber_id   UUID NOT NULL REFERENCES profiles(id),
-  service_id  UUID NOT NULL REFERENCES services(id),
-  starts_at   TIMESTAMPTZ NOT NULL,
-  ends_at     TIMESTAMPTZ NOT NULL,
-  status      TEXT NOT NULL DEFAULT 'confirmed'
-              CHECK (status IN ('confirmed', 'completed', 'cancelled', 'no_show')),
-  notes       TEXT,
-  created_at  TIMESTAMPTZ DEFAULT now(),
-  updated_at  TIMESTAMPTZ DEFAULT now()
-);
-
-CREATE INDEX idx_appointments_tenant_date
-  ON appointments(tenant_id, starts_at)
-  WHERE status != 'cancelled';
-
--- ============================================
--- TABLA: reminders (log de recordatorios)
--- ============================================
-CREATE TABLE reminders (
+CREATE TABLE negocio (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  appointment_id  UUID NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
-  channel         TEXT NOT NULL CHECK (channel IN ('whatsapp', 'email', 'sms')),
-  status          TEXT NOT NULL DEFAULT 'pending'
-                  CHECK (status IN ('pending', 'sent', 'failed', 'delivered')),
-  scheduled_for   TIMESTAMPTZ NOT NULL,
-  sent_at         TIMESTAMPTZ,
-  error_message   TEXT,
-  created_at      TIMESTAMPTZ DEFAULT now()
+  nombre          TEXT NOT NULL,
+  telefono        TEXT,
+  direccion       TEXT,
+  zona_horaria    TEXT DEFAULT 'Europe/Madrid',
+  horario_laboral JSONB NOT NULL DEFAULT '{
+    "lun": [{"apertura": "10:00", "cierre": "14:00"}, {"apertura": "16:00", "cierre": "20:00"}],
+    "mar": [{"apertura": "10:00", "cierre": "14:00"}, {"apertura": "16:00", "cierre": "20:00"}],
+    "mie": [{"apertura": "10:00", "cierre": "14:00"}, {"apertura": "16:00", "cierre": "20:00"}],
+    "jue": [{"apertura": "10:00", "cierre": "14:00"}, {"apertura": "16:00", "cierre": "20:00"}],
+    "vie": [{"apertura": "10:00", "cierre": "14:00"}, {"apertura": "16:00", "cierre": "20:00"}],
+    "sab": [{"apertura": "10:00", "cierre": "14:00"}],
+    "dom": null
+  }'::jsonb,
+  creado_en       TIMESTAMPTZ DEFAULT now(),
+  actualizado_en  TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================
+-- TABLA: empleados (barberos / dueños)
+-- ============================================
+CREATE TABLE empleados (
+  id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nombre        TEXT NOT NULL,
+  rol           TEXT NOT NULL DEFAULT 'barbero' CHECK (rol IN ('propietario', 'barbero')),
+  telefono      TEXT,
+  avatar_url    TEXT,
+  activo        BOOLEAN DEFAULT true,
+  creado_en     TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================
+-- TABLA: clientes
+-- ============================================
+CREATE TABLE clientes (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre          TEXT NOT NULL,
+  telefono        TEXT UNIQUE,
+  email           TEXT,
+  notas           TEXT,
+  creado_en       TIMESTAMPTZ DEFAULT now(),
+  actualizado_en  TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================
+-- TABLA: servicios (catálogo)
+-- ============================================
+CREATE TABLE servicios (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre        TEXT NOT NULL,
+  duracion      INTEGER NOT NULL DEFAULT 30,       -- minutos
+  precio        DECIMAL(8,2) NOT NULL,             -- euros
+  activo        BOOLEAN DEFAULT true,
+  orden         INTEGER DEFAULT 0,
+  creado_en     TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================
+-- TABLA: citas
+-- ============================================
+CREATE TABLE citas (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cliente_id      UUID NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  empleado_id     UUID NOT NULL REFERENCES empleados(id),
+  servicio_id     UUID NOT NULL REFERENCES servicios(id),
+  inicio          TIMESTAMPTZ NOT NULL,
+  fin             TIMESTAMPTZ NOT NULL,
+  estado          TEXT NOT NULL DEFAULT 'confirmada'
+                  CHECK (estado IN ('confirmada', 'completada', 'cancelada', 'no_asistio')),
+  notas           TEXT,
+  creado_en       TIMESTAMPTZ DEFAULT now(),
+  actualizado_en  TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_citas_fecha
+  ON citas(inicio)
+  WHERE estado != 'cancelada';
+
+-- ============================================
+-- TABLA: recordatorios (log de envíos)
+-- ============================================
+CREATE TABLE recordatorios (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cita_id         UUID NOT NULL REFERENCES citas(id) ON DELETE CASCADE,
+  canal           TEXT NOT NULL CHECK (canal IN ('whatsapp', 'email', 'sms')),
+  estado          TEXT NOT NULL DEFAULT 'pendiente'
+                  CHECK (estado IN ('pendiente', 'enviado', 'fallido', 'entregado')),
+  programado_para TIMESTAMPTZ NOT NULL,
+  enviado_en      TIMESTAMPTZ,
+  mensaje_error   TEXT,
+  creado_en       TIMESTAMPTZ DEFAULT now()
 );
 
 -- ============================================
 -- RLS: Row Level Security
 -- ============================================
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE services ENABLE ROW LEVEL SECURITY;
-ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE empleados ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE servicios ENABLE ROW LEVEL SECURITY;
+ALTER TABLE citas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recordatorios ENABLE ROW LEVEL SECURITY;
 
--- Helper: get tenant_id of current user
-CREATE OR REPLACE FUNCTION get_user_tenant_id()
-RETURNS UUID AS $$
-  SELECT tenant_id FROM profiles WHERE id = auth.uid()
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+-- Empleados autenticados: acceso total
+CREATE POLICY "acceso_empleados" ON empleados
+  FOR ALL USING (auth.uid() IS NOT NULL);
 
--- Profiles: users see only their tenant
-CREATE POLICY "tenant_isolation" ON profiles
-  FOR ALL USING (tenant_id = get_user_tenant_id());
+CREATE POLICY "acceso_empleados" ON clientes
+  FOR ALL USING (auth.uid() IS NOT NULL);
 
--- Clients: users see only their tenant's clients
-CREATE POLICY "tenant_isolation" ON clients
-  FOR ALL USING (tenant_id = get_user_tenant_id());
+CREATE POLICY "acceso_empleados" ON servicios
+  FOR ALL USING (auth.uid() IS NOT NULL);
 
--- Services: users see only their tenant's services
-CREATE POLICY "tenant_isolation" ON services
-  FOR ALL USING (tenant_id = get_user_tenant_id());
+CREATE POLICY "acceso_empleados" ON citas
+  FOR ALL USING (auth.uid() IS NOT NULL);
 
--- Appointments: users see only their tenant's appointments
-CREATE POLICY "tenant_isolation" ON appointments
-  FOR ALL USING (tenant_id = get_user_tenant_id());
-
--- Reminders: users see only reminders for their tenant's appointments
-CREATE POLICY "tenant_isolation" ON reminders
-  FOR ALL USING (
-    appointment_id IN (
-      SELECT id FROM appointments WHERE tenant_id = get_user_tenant_id()
-    )
-  );
+CREATE POLICY "acceso_empleados" ON recordatorios
+  FOR ALL USING (auth.uid() IS NOT NULL);
 
 -- ============================================
--- PUBLIC ACCESS: booking page (anon users)
--- Services and profiles are readable for booking
+-- ACCESO PÚBLICO: página de reservas (usuarios anónimos)
 -- ============================================
-CREATE POLICY "public_read_services" ON services
-  FOR SELECT USING (is_active = true);
+CREATE POLICY "lectura_publica_servicios" ON servicios
+  FOR SELECT USING (activo = true);
 
-CREATE POLICY "public_read_barbers" ON profiles
-  FOR SELECT USING (is_active = true);
+CREATE POLICY "lectura_publica_empleados" ON empleados
+  FOR SELECT USING (activo = true);
 
--- Anon users can insert appointments (booking)
-CREATE POLICY "public_create_appointment" ON appointments
+-- Anónimos pueden crear citas (reservar)
+CREATE POLICY "crear_cita_publica" ON citas
   FOR INSERT WITH CHECK (true);
 
--- Anon users can insert clients (self-register when booking)
-CREATE POLICY "public_create_client" ON clients
+-- Anónimos pueden crear clientes (auto-registro al reservar)
+CREATE POLICY "crear_cliente_publico" ON clientes
   FOR INSERT WITH CHECK (true);
