@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { sendReservaEmails } from "@/lib/email/sendReservaEmails";
+import { phoneSchema } from "@/lib/validation/phone";
 import type { Empleado, HorarioLaboral, HorarioTramo, Servicio } from "@/lib/types";
 
 const DIAS_SEMANA: Array<keyof HorarioLaboral> = [
@@ -210,7 +211,7 @@ const reservaSchema = z.object({
   hora: z.string().regex(/^\d{2}:\d{2}$/),
   cliente: z.object({
     nombre: z.string().trim().min(2).max(100),
-    telefono: z.string().trim().min(6).max(20),
+    telefono: phoneSchema,
     email: z.string().trim().email().optional().or(z.literal("")),
     notas: z.string().trim().max(500).optional(),
   }),
@@ -282,12 +283,15 @@ export async function crearReserva(input: ReservaInput): Promise<ReservaResult> 
     const raw = rpcError?.message ?? "";
     const slotConflict =
       raw.includes("SLOT_OCUPADO") || raw.includes("citas_no_solape_excl");
-    return {
-      success: false,
-      error: slotConflict
-        ? "Esa hora acaba de ocuparse. Elige otra, por favor."
-        : "No se pudo crear la reserva. Inténtalo de nuevo.",
-    };
+    const rateLimited = raw.includes("RATE_LIMIT_EXCEEDED");
+    let error = "No se pudo crear la reserva. Inténtalo de nuevo.";
+    if (slotConflict) {
+      error = "Esa hora acaba de ocuparse. Elige otra, por favor.";
+    } else if (rateLimited) {
+      error =
+        "Has hecho varias reservas recientemente. Espera un poco antes de crear otra.";
+    }
+    return { success: false, error };
   }
 
   // Fire-and-forget: el envío de emails no debe bloquear la respuesta al cliente.

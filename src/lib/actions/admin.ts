@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { phoneSchemaOptional } from "@/lib/validation/phone";
 import type { Empleado, HorarioLaboral, Negocio, Servicio } from "@/lib/types";
 
 async function requireUser() {
@@ -65,12 +66,19 @@ export async function crearServicio(
   const parsed = crearServicioSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Datos no válidos" };
 
-  const { supabase } = await requireUser();
-  const { error } = await supabase.from("servicios").insert(parsed.data);
-  if (error) return { success: false, error: error.message };
-  revalidatePath("/panel/servicios");
-  revalidatePath("/reservar");
-  return { success: true };
+  try {
+    const { supabase } = await requirePropietario();
+    const { error } = await supabase.from("servicios").insert(parsed.data);
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/panel/servicios");
+    revalidatePath("/reservar");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Error desconocido",
+    };
+  }
 }
 
 export async function actualizarServicio(
@@ -79,25 +87,42 @@ export async function actualizarServicio(
   const parsed = actualizarServicioSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Datos no válidos" };
 
-  const { id, ...rest } = parsed.data;
-  const { supabase } = await requireUser();
-  const { error } = await supabase.from("servicios").update(rest).eq("id", id);
-  if (error) return { success: false, error: error.message };
-  revalidatePath("/panel/servicios");
-  revalidatePath("/reservar");
-  return { success: true };
+  try {
+    const { id, ...rest } = parsed.data;
+    const { supabase } = await requirePropietario();
+    const { error } = await supabase
+      .from("servicios")
+      .update(rest)
+      .eq("id", id);
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/panel/servicios");
+    revalidatePath("/reservar");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Error desconocido",
+    };
+  }
 }
 
 export async function eliminarServicio(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   const uuid = z.string().uuid().parse(id);
-  const { supabase } = await requireUser();
-  const { error } = await supabase.from("servicios").delete().eq("id", uuid);
-  if (error) return { success: false, error: error.message };
-  revalidatePath("/panel/servicios");
-  revalidatePath("/reservar");
-  return { success: true };
+  try {
+    const { supabase } = await requirePropietario();
+    const { error } = await supabase.from("servicios").delete().eq("id", uuid);
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/panel/servicios");
+    revalidatePath("/reservar");
+    return { success: true };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Error desconocido",
+    };
+  }
 }
 
 // ============================================
@@ -118,7 +143,7 @@ export async function listarEmpleados(): Promise<Empleado[]> {
 const actualizarEmpleadoSchema = z.object({
   id: z.string().uuid(),
   nombre: z.string().trim().min(2).max(80),
-  telefono: z.string().trim().min(6).max(20).optional().or(z.literal("")),
+  telefono: phoneSchemaOptional,
   avatar_url: z.string().trim().url().optional().or(z.literal("")),
   activo: z.boolean(),
 });
@@ -208,7 +233,7 @@ const horarioLaboralSchema = z.object({
 const actualizarNegocioSchema = z.object({
   id: z.string().uuid(),
   nombre: z.string().trim().min(2).max(100),
-  telefono: z.string().trim().min(6).max(20).optional().or(z.literal("")),
+  telefono: phoneSchemaOptional,
   direccion: z.string().trim().max(200).optional().or(z.literal("")),
   horario_laboral: horarioLaboralSchema,
 });

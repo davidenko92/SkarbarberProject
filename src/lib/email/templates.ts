@@ -16,13 +16,33 @@ const BRAND_GOLD = "#c4a462";
 const BG = "#0a0a0a";
 const SURFACE = "#141414";
 
+function esc(s: string | null | undefined): string {
+  if (s == null) return "";
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+function safeTelHref(tel: string): string {
+  const cleaned = tel.replace(/[^+\d\s().-]/g, "");
+  return `tel:${cleaned}`;
+}
+
+function safeMailtoHref(email: string): string {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? `mailto:${email}` : "";
+}
+
 function shell(title: string, inner: string): string {
+  const safeTitle = esc(title);
   return `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
+<title>${safeTitle}</title>
 </head>
 <body style="margin:0;padding:0;background:${BG};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#fff;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BG};padding:32px 16px;">
@@ -47,7 +67,7 @@ function shell(title: string, inner: string): string {
 
 function infoRow(label: string, value: string): string {
   return `<tr>
-    <td style="padding:8px 0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);width:140px;vertical-align:top;">${label}</td>
+    <td style="padding:8px 0;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);width:140px;vertical-align:top;">${esc(label)}</td>
     <td style="padding:8px 0;font-size:15px;color:#fff;vertical-align:top;">${value}</td>
   </tr>`;
 }
@@ -58,22 +78,24 @@ export function emailClienteConfirmacion(d: ReservaEmailData): {
   text: string;
 } {
   const subject = `Cita confirmada · ${d.fechaLegible} a las ${d.horaLegible}`;
+  const servicioConPrecio =
+    d.servicioNombre + (d.precio != null ? ` · ${d.precio}€` : "");
   const inner = `
     <tr><td style="padding:8px 28px 8px 28px;">
       <h1 style="margin:8px 0 6px 0;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:30px;line-height:1.1;color:#fff;">
         Cita <em style="font-style:italic;color:${BRAND_GOLD};">confirmada</em>
       </h1>
       <p style="margin:0 0 18px 0;font-size:14px;color:rgba(255,255,255,.7);line-height:1.55;">
-        Hola ${d.clienteNombre}, te esperamos en Skar Barber.
+        Hola ${esc(d.clienteNombre)}, te esperamos en Skar Barber.
       </p>
     </td></tr>
     <tr><td style="padding:0 28px 4px 28px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        ${infoRow("Día", d.fechaLegible)}
-        ${infoRow("Hora", d.horaLegible)}
-        ${infoRow("Barbero", d.barberoNombre)}
-        ${infoRow("Servicio", d.servicioNombre + (d.precio != null ? ` · ${d.precio}€` : ""))}
-        ${d.notas ? infoRow("Notas", d.notas) : ""}
+        ${infoRow("Día", esc(d.fechaLegible))}
+        ${infoRow("Hora", esc(d.horaLegible))}
+        ${infoRow("Barbero", esc(d.barberoNombre))}
+        ${infoRow("Servicio", esc(servicioConPrecio))}
+        ${d.notas ? infoRow("Notas", esc(d.notas)) : ""}
       </table>
     </td></tr>
     <tr><td style="padding:20px 28px 8px 28px;">
@@ -92,6 +114,10 @@ export function emailBarberoNuevaCita(d: ReservaEmailData): {
   text: string;
 } {
   const subject = `Nueva cita · ${d.fechaLegible} ${d.horaLegible} · ${d.clienteNombre}`;
+  const servicioConPrecio =
+    d.servicioNombre + (d.precio != null ? ` · ${d.precio}€` : "");
+  const telHref = safeTelHref(d.clienteTelefono);
+  const mailHref = d.clienteEmail ? safeMailtoHref(d.clienteEmail) : "";
   const inner = `
     <tr><td style="padding:8px 28px 8px 28px;">
       <h1 style="margin:8px 0 6px 0;font-family:'Playfair Display',Georgia,serif;font-weight:400;font-size:30px;line-height:1.1;color:#fff;">
@@ -103,13 +129,13 @@ export function emailBarberoNuevaCita(d: ReservaEmailData): {
     </td></tr>
     <tr><td style="padding:0 28px 4px 28px;">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-        ${infoRow("Día", d.fechaLegible)}
-        ${infoRow("Hora", d.horaLegible)}
-        ${infoRow("Cliente", d.clienteNombre)}
-        ${infoRow("Teléfono", `<a href="tel:${d.clienteTelefono}" style="color:${BRAND_GOLD};text-decoration:none;">${d.clienteTelefono}</a>`)}
-        ${d.clienteEmail ? infoRow("Email", `<a href="mailto:${d.clienteEmail}" style="color:${BRAND_GOLD};text-decoration:none;">${d.clienteEmail}</a>`) : ""}
-        ${infoRow("Servicio", d.servicioNombre + (d.precio != null ? ` · ${d.precio}€` : ""))}
-        ${d.notas ? infoRow("Notas", d.notas) : ""}
+        ${infoRow("Día", esc(d.fechaLegible))}
+        ${infoRow("Hora", esc(d.horaLegible))}
+        ${infoRow("Cliente", esc(d.clienteNombre))}
+        ${infoRow("Teléfono", `<a href="${esc(telHref)}" style="color:${BRAND_GOLD};text-decoration:none;">${esc(d.clienteTelefono)}</a>`)}
+        ${mailHref ? infoRow("Email", `<a href="${esc(mailHref)}" style="color:${BRAND_GOLD};text-decoration:none;">${esc(d.clienteEmail ?? "")}</a>`) : ""}
+        ${infoRow("Servicio", esc(servicioConPrecio))}
+        ${d.notas ? infoRow("Notas", esc(d.notas)) : ""}
       </table>
     </td></tr>`;
   const html = shell(subject, inner);
