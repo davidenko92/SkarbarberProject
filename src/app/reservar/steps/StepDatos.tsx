@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { phoneSchema } from "@/lib/validation/phone";
 import type { BookingDatosCliente } from "../booking-reducer";
 import { GlassCard } from "../components/GlassCard";
 import { GoldButton } from "../components/GoldButton";
@@ -28,8 +29,11 @@ export function StepDatos({
   function validar(): boolean {
     const nuevos: Partial<Record<keyof BookingDatosCliente, string>> = {};
     if (datos.nombre.trim().length < 2) nuevos.nombre = "Nombre demasiado corto";
-    if (!/^[+\d\s-]{6,20}$/.test(datos.telefono.trim()))
-      nuevos.telefono = "Teléfono no válido";
+    const telCheck = phoneSchema.safeParse(datos.telefono);
+    if (!telCheck.success) {
+      nuevos.telefono =
+        telCheck.error.issues[0]?.message ?? "Teléfono no válido";
+    }
     if (datos.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email))
       nuevos.email = "Email no válido";
     setErrores(nuevos);
@@ -71,6 +75,7 @@ export function StepDatos({
             onChange={(v) => onChange({ telefono: v })}
             error={errores.telefono}
             type="tel"
+            inputMode="tel"
             autoComplete="tel"
           />
           <Field
@@ -147,6 +152,7 @@ interface FieldProps {
   error?: string;
   type?: string;
   autoComplete?: string;
+  inputMode?: "tel" | "email" | "text" | "numeric" | "url";
 }
 
 function Field({
@@ -156,6 +162,7 @@ function Field({
   error,
   type = "text",
   autoComplete,
+  inputMode,
 }: FieldProps) {
   return (
     <div>
@@ -167,6 +174,7 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete={autoComplete}
+        inputMode={inputMode}
         className="line-input"
       />
       {error && (

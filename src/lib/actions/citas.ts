@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { phoneSchema, phoneSchemaOptional } from "@/lib/validation/phone";
 import type { Cita, Cliente, CitaConDetalles } from "@/lib/types";
 import { getSlotsDisponibles } from "./reservas";
 
@@ -118,7 +119,7 @@ export async function getClienteConHistorial(
 const actualizarClienteSchema = z.object({
   id: z.string().uuid(),
   nombre: z.string().trim().min(2).max(100),
-  telefono: z.string().trim().min(6).max(20).optional().or(z.literal("")),
+  telefono: phoneSchemaOptional,
   email: z.string().trim().email().optional().or(z.literal("")),
   notas: z.string().trim().max(500).optional().or(z.literal("")),
 });
@@ -221,7 +222,7 @@ const citaManualSchema = z
       z.object({
         tipo: z.literal("nuevo"),
         nombre: z.string().trim().min(2).max(100),
-        telefono: z.string().trim().min(6).max(20),
+        telefono: phoneSchema,
         email: z
           .string()
           .trim()

@@ -198,6 +198,8 @@ export function ClienteFicha({ cliente, historial }: ClienteFichaProps) {
             value={form.telefono}
             onChange={(v) => setForm({ ...form, telefono: v })}
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
             placeholder="+34 600 000 000"
           />
           <FieldEdit
@@ -368,12 +370,16 @@ function FieldEdit({
   onChange,
   type = "text",
   placeholder,
+  inputMode,
+  autoComplete,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
+  inputMode?: "tel" | "email" | "text" | "numeric" | "url";
+  autoComplete?: string;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -385,6 +391,8 @@ function FieldEdit({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
         className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-[14px] text-white placeholder:text-white/30 focus:border-gold/50 focus:outline-none"
       />
     </label>
