@@ -9,7 +9,10 @@ interface StepLandingProps {
 export function StepLanding({ onStart }: StepLandingProps) {
   return (
     <div className="animate-step-in flex min-h-dvh flex-col items-center justify-between gap-5 py-4">
-      <GlassCard className="flex w-full flex-col items-center rounded-[2rem] px-7 pb-8 pt-7 text-center">
+      <GlassCard
+        variant="feature"
+        className="flex w-full flex-col items-center rounded-[2rem] px-7 pb-9 pt-8 text-center"
+      >
         <div className="-mx-2 -mb-2 -mt-4 aspect-[5/4] w-[calc(100%+1rem)]">
           <Image
             src="/icono-transparente.png"

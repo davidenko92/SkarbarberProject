@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from "react";
 
 interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  variant?: "subtle" | "default" | "solid";
+  variant?: "subtle" | "default" | "solid" | "feature";
   interactive?: boolean;
 }
 
@@ -20,6 +20,7 @@ export function GlassCard({
         "edge-card",
         variant === "solid" && "edge-card--solid",
         variant === "subtle" && "edge-card--subtle",
+        variant === "feature" && "edge-card--feature",
         interactive && "edge-card-interactive cursor-pointer",
         className,
       )}

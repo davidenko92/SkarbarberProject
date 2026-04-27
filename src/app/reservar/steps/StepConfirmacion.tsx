@@ -49,11 +49,11 @@ export function StepConfirmacion({
       </div>
 
       <GlassCard className="w-full px-8 py-9">
-        <dl className="divide-y divide-gold/10">
-          {barbero && <Row label="Barbero" value={barbero.nombre} />}
+        <dl className="space-y-0">
+          {barbero && <Row label="Barbero" value={barbero.nombre} first />}
           {servicio && (
             <>
-              <Row label="Servicio" value={servicio.nombre} />
+              <Row label="Servicio" value={servicio.nombre} first={!barbero} />
               <Row
                 label="Precio"
                 value={`${Number(servicio.precio).toFixed(0)}€`}
@@ -96,26 +96,33 @@ function Row({
   value,
   strong,
   capitalize,
+  first,
 }: {
   label: string;
   value: string;
   strong?: boolean;
   capitalize?: boolean;
+  first?: boolean;
 }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-[18px] first:pt-0 last:pb-0">
-      <span className="eyebrow">{label}</span>
-      <span
-        className={[
-          "text-right",
-          strong ? "font-serif text-[26px] leading-none tracking-tight text-gold drop-shadow-[0_0_16px_rgba(196,164,98,0.3)]" : "text-[17px] font-light text-white/95",
-          capitalize ? "capitalize" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-      >
-        {value}
-      </span>
+    <div className="relative">
+      {!first && <span className="divider-gold pointer-events-none absolute inset-x-0 top-0" />}
+      <div className="flex items-baseline justify-between gap-4 py-[18px] first:pt-0 last:pb-0">
+        <span className="eyebrow">{label}</span>
+        <span
+          className={[
+            "text-right",
+            strong
+              ? "font-serif text-[26px] leading-none tracking-tight text-gold drop-shadow-[0_0_16px_rgba(196,164,98,0.3)]"
+              : "text-[17px] font-light text-white/95",
+            capitalize ? "capitalize" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
