@@ -30,14 +30,20 @@ export function BottomNav() {
             <li key={href} className="flex-1">
               <Link
                 href={href}
-                className="relative flex flex-col items-center justify-center gap-1 py-1.5 transition-colors"
+                className="relative flex flex-col items-center justify-center gap-1 py-1 transition-colors"
               >
-                <Icon
-                  className={`h-5 w-5 transition-colors ${
-                    isActive ? "text-gold" : "text-white/45"
-                  }`}
-                  strokeWidth={isActive ? 2 : 1.5}
-                />
+                {isActive ? (
+                  <span className="nav-tab-active-chip">
+                    <Icon className="h-[18px] w-[18px]" strokeWidth={2.1} />
+                  </span>
+                ) : (
+                  <span className="flex h-[38px] w-[38px] items-center justify-center">
+                    <Icon
+                      className="h-5 w-5 text-white/45 transition-colors"
+                      strokeWidth={1.6}
+                    />
+                  </span>
+                )}
                 <span
                   className={`text-[10px] font-medium tracking-[0.18em] uppercase transition-colors ${
                     isActive ? "text-gold" : "text-white/45"
@@ -45,12 +51,6 @@ export function BottomNav() {
                 >
                   {label}
                 </span>
-                {isActive && (
-                  <span
-                    aria-hidden
-                    className="absolute -top-0.5 h-[3px] w-8 rounded-full bg-gradient-to-r from-transparent via-gold to-transparent shadow-[0_0_10px_rgba(229,193,113,0.7)]"
-                  />
-                )}
               </Link>
             </li>
           );

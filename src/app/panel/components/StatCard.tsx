@@ -10,11 +10,11 @@ interface StatCardProps {
 
 export function StatCard({ label, value, icon: Icon, accent = false }: StatCardProps) {
   return (
-    <PanelCard className="p-4 flex items-start justify-between gap-3">
-      <div className="flex flex-col gap-1.5">
+    <PanelCard className="p-4 flex items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-col gap-2">
         <span className="panel-label">{label}</span>
         <span
-          className={`text-3xl font-light tracking-tight ${
+          className={`font-serif text-[34px] leading-none tracking-tight ${
             accent ? "text-gold" : "text-white"
           }`}
         >
@@ -22,9 +22,9 @@ export function StatCard({ label, value, icon: Icon, accent = false }: StatCardP
         </span>
       </div>
       {Icon && (
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-gold/30 bg-gold/5">
-          <Icon className="h-4 w-4 text-gold" strokeWidth={1.5} />
-        </div>
+        <span className="stat-ring shrink-0">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.5} />
+        </span>
       )}
     </PanelCard>
   );

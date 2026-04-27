@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { Clock, Calendar, TrendingUp } from "lucide-react";
+import { Calendar, TrendingUp } from "lucide-react";
 import type { CitaConDetalles, Empleado } from "@/lib/types";
 import { getCitasDelDia } from "@/lib/actions/agenda";
 import { StatCard } from "./StatCard";
@@ -95,7 +95,6 @@ export function AgendaClient({
         </div>
       ) : visibles.length === 0 ? (
         <EmptyState
-          icon={Clock}
           title="Sin citas"
           description="No hay citas para este día con el filtro activo."
         />
