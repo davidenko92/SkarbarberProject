@@ -65,14 +65,14 @@ export function DateNavigator({ fecha, onChange }: DateNavigatorProps) {
         type="button"
         onClick={() => onChange(shiftDays(fecha, -1))}
         aria-label="Día anterior"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-black/40 text-gold/80 transition-all hover:border-gold/60 hover:bg-gold/10 hover:text-gold active:scale-95"
+        className="dial-arrow shrink-0"
       >
-        <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+        <ChevronLeft className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </button>
 
-      <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
         <div className="flex items-baseline gap-2">
-          <span className="font-serif text-[22px] leading-none text-white">
+          <span className="font-serif text-[26px] leading-none text-white">
             {etiqueta}
           </span>
           {!esHoy && (
@@ -85,7 +85,7 @@ export function DateNavigator({ fecha, onChange }: DateNavigatorProps) {
             </button>
           )}
         </div>
-        <span className="truncate text-[10.5px] uppercase tracking-[0.24em] text-white/45">
+        <span className="truncate text-[10.5px] uppercase tracking-[0.28em] text-gold/65">
           {subtitulo}
         </span>
       </div>
@@ -94,9 +94,9 @@ export function DateNavigator({ fecha, onChange }: DateNavigatorProps) {
         type="button"
         onClick={() => onChange(shiftDays(fecha, 1))}
         aria-label="Día siguiente"
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gold/30 bg-black/40 text-gold/80 transition-all hover:border-gold/60 hover:bg-gold/10 hover:text-gold active:scale-95"
+        className="dial-arrow shrink-0"
       >
-        <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+        <ChevronRight className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </button>
     </div>
   );
