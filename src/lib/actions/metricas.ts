@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { HorarioLaboral } from "@/lib/types";
+import { resolverRango } from "@/lib/metricas/periodos";
+import type { FiltroRango } from "@/lib/metricas/periodos";
 
 async function requireUser() {
   const supabase = await createClient();
@@ -50,6 +52,7 @@ function inicioMes(d: Date) {
 function inicioMesSiguiente(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 1, 0, 0, 0, 0);
 }
+
 
 const DIAS_KEYS: Array<keyof HorarioLaboral> = [
   "dom",
@@ -125,19 +128,59 @@ export async function getKpis(): Promise<KpisDashboard> {
   };
 }
 
-export interface OcupacionDia {
-  fecha: string;
-  diaCorto: string;
+export interface OcupacionPunto {
+  key: string;
+  etiqueta: string;
   ocupados: number;
   capacidad: number;
   porcentaje: number;
+  cerrado: boolean;
 }
 
-export async function getOcupacionSemanal(): Promise<OcupacionDia[]> {
+export type OcupacionModo = "dia-letra" | "dia-fecha" | "semana" | "mes";
+
+export interface OcupacionResultado {
+  puntos: OcupacionPunto[];
+  modo: OcupacionModo;
+  titulo: string;
+}
+
+const DIA_LETRA = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+const MES_CORTO = [
+  "ene", "feb", "mar", "abr", "may", "jun",
+  "jul", "ago", "sep", "oct", "nov", "dic",
+];
+
+function diaSemanaLunIdx(d: Date) {
+  const dow = d.getDay();
+  return dow === 0 ? 6 : dow - 1;
+}
+
+export async function getOcupacion(
+  filtros: MetricasFiltros = {},
+): Promise<OcupacionResultado> {
   const { supabase } = await requireUser();
-  const ahora = new Date();
-  const semanaIni = inicioSemanaLunes(ahora);
-  const semanaFin = new Date(semanaIni.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const { desde, hasta } = resolverRango(filtros);
+
+  const totalDias = Math.max(
+    1,
+    Math.round((hasta.getTime() - desde.getTime()) / (24 * 60 * 60 * 1000)),
+  );
+
+  let barberosQuery = supabase
+    .from("empleados")
+    .select("id")
+    .eq("activo", true);
+  if (filtros.empleadoId) barberosQuery = barberosQuery.eq("id", filtros.empleadoId);
+
+  let citasQuery = supabase
+    .from("citas")
+    .select("inicio, fin, estado")
+    .gte("inicio", desde.toISOString())
+    .lt("inicio", hasta.toISOString())
+    .in("estado", ["confirmada", "completada"]);
+  if (filtros.empleadoId)
+    citasQuery = citasQuery.eq("empleado_id", filtros.empleadoId);
 
   const [{ data: negocio }, { data: barberos }, { data: citas }] =
     await Promise.all([
@@ -147,68 +190,137 @@ export async function getOcupacionSemanal(): Promise<OcupacionDia[]> {
         .limit(1)
         .maybeSingle()
         .returns<{ horario_laboral: HorarioLaboral } | null>(),
-      supabase
-        .from("empleados")
-        .select("id")
-        .eq("activo", true)
-        .returns<Array<{ id: string }>>(),
-      supabase
-        .from("citas")
-        .select("inicio, fin, estado")
-        .gte("inicio", semanaIni.toISOString())
-        .lt("inicio", semanaFin.toISOString())
-        .in("estado", ["confirmada", "completada"])
-        .returns<Array<{ inicio: string; fin: string; estado: string }>>(),
+      barberosQuery.returns<Array<{ id: string }>>(),
+      citasQuery.returns<Array<{ inicio: string; fin: string; estado: string }>>(),
     ]);
 
   const horario = negocio?.horario_laboral;
   const numBarberos = (barberos ?? []).length || 1;
 
-  const minutosOcupadosPorDia = new Map<string, number>();
+  const minutosPorDia = new Map<string, number>();
   for (const c of citas ?? []) {
     const ini = new Date(c.inicio);
     const fin = new Date(c.fin);
     const clave = fmtISO(ini);
     const min = (fin.getTime() - ini.getTime()) / 60_000;
-    minutosOcupadosPorDia.set(
-      clave,
-      (minutosOcupadosPorDia.get(clave) ?? 0) + min,
-    );
+    minutosPorDia.set(clave, (minutosPorDia.get(clave) ?? 0) + min);
   }
 
-  const dias: OcupacionDia[] = [];
-  const cortos = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(semanaIni);
-    d.setDate(semanaIni.getDate() + i);
-    const fechaISO = fmtISO(d);
+  function capacidadDia(d: Date): number {
     const dow = d.getDay();
     const tramos = horario?.[DIAS_KEYS[dow]] ?? null;
-
-    let capacidad = 0;
-    if (Array.isArray(tramos) && tramos.length > 0) {
-      for (const t of tramos) {
-        const [ah, am] = t.apertura.split(":").map(Number);
-        const [ch, cm] = t.cierre.split(":").map(Number);
-        capacidad += (ch * 60 + cm) - (ah * 60 + am);
-      }
+    if (!Array.isArray(tramos) || tramos.length === 0) return 0;
+    let cap = 0;
+    for (const t of tramos) {
+      const [ah, am] = t.apertura.split(":").map(Number);
+      const [ch, cm] = t.cierre.split(":").map(Number);
+      cap += ch * 60 + cm - (ah * 60 + am);
     }
-    capacidad *= numBarberos;
-
-    const ocupados = minutosOcupadosPorDia.get(fechaISO) ?? 0;
-    const porcentaje =
-      capacidad > 0 ? Math.min(100, Math.round((ocupados / capacidad) * 100)) : 0;
-
-    dias.push({
-      fecha: fechaISO,
-      diaCorto: cortos[i],
-      ocupados,
-      capacidad,
-      porcentaje,
-    });
+    return cap * numBarberos;
   }
 
-  return dias;
+  let modo: OcupacionModo;
+  if (totalDias <= 14) {
+    const esSemanaCompleta =
+      totalDias === 7 && diaSemanaLunIdx(desde) === 0;
+    modo = esSemanaCompleta ? "dia-letra" : "dia-fecha";
+  } else if (totalDias <= 92) {
+    modo = "semana";
+  } else {
+    modo = "mes";
+  }
+
+  const puntos: OcupacionPunto[] = [];
+
+  if (modo === "dia-letra" || modo === "dia-fecha") {
+    const compactaDia = totalDias > 3;
+    for (let i = 0; i < totalDias; i++) {
+      const d = new Date(desde);
+      d.setDate(desde.getDate() + i);
+      const key = fmtISO(d);
+      const cap = capacidadDia(d);
+      const ocup = minutosPorDia.get(key) ?? 0;
+      const pct = cap > 0 ? Math.min(100, Math.round((ocup / cap) * 100)) : 0;
+      let etiqueta: string;
+      if (modo === "dia-letra") {
+        etiqueta = DIA_LETRA[diaSemanaLunIdx(d)];
+      } else if (compactaDia) {
+        etiqueta = String(d.getDate());
+      } else {
+        etiqueta = `${d.getDate()} ${MES_CORTO[d.getMonth()]}`;
+      }
+      puntos.push({
+        key,
+        etiqueta,
+        ocupados: ocup,
+        capacidad: cap,
+        porcentaje: pct,
+        cerrado: cap === 0,
+      });
+    }
+  } else if (modo === "semana") {
+    let cursor = new Date(desde);
+    const offset = diaSemanaLunIdx(cursor);
+    cursor.setDate(cursor.getDate() - offset);
+    while (cursor < hasta) {
+      let cap = 0;
+      let ocup = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(cursor);
+        d.setDate(cursor.getDate() + i);
+        if (d < desde || d >= hasta) continue;
+        cap += capacidadDia(d);
+        ocup += minutosPorDia.get(fmtISO(d)) ?? 0;
+      }
+      const pct = cap > 0 ? Math.min(100, Math.round((ocup / cap) * 100)) : 0;
+      puntos.push({
+        key: fmtISO(cursor),
+        etiqueta: `${cursor.getDate()}${MES_CORTO[cursor.getMonth()]}`,
+        ocupados: ocup,
+        capacidad: cap,
+        porcentaje: pct,
+        cerrado: cap === 0,
+      });
+      cursor = new Date(cursor);
+      cursor.setDate(cursor.getDate() + 7);
+    }
+  } else {
+    let cursor = new Date(desde.getFullYear(), desde.getMonth(), 1);
+    while (cursor < hasta) {
+      const finMes = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+      let cap = 0;
+      let ocup = 0;
+      const d = new Date(cursor);
+      while (d < finMes && d < hasta) {
+        if (d >= desde) {
+          cap += capacidadDia(d);
+          ocup += minutosPorDia.get(fmtISO(d)) ?? 0;
+        }
+        d.setDate(d.getDate() + 1);
+      }
+      const pct = cap > 0 ? Math.min(100, Math.round((ocup / cap) * 100)) : 0;
+      puntos.push({
+        key: `${cursor.getFullYear()}-${cursor.getMonth() + 1}`,
+        etiqueta: MES_CORTO[cursor.getMonth()].toUpperCase(),
+        ocupados: ocup,
+        capacidad: cap,
+        porcentaje: pct,
+        cerrado: cap === 0,
+      });
+      cursor = finMes;
+    }
+  }
+
+  const titulo =
+    modo === "dia-letra"
+      ? "Ocupación semanal"
+      : modo === "dia-fecha"
+        ? "Ocupación por día"
+        : modo === "semana"
+          ? "Ocupación por semana"
+          : "Ocupación por mes";
+
+  return { puntos, modo, titulo };
 }
 
 export interface TopCliente {
@@ -274,31 +386,34 @@ export interface TopServicio {
   ingresos: number;
 }
 
-export async function getTopServiciosMes(limit = 5): Promise<TopServicio[]> {
+export async function getTopServiciosMes(
+  limit = 5,
+  filtros: MetricasFiltros = {},
+): Promise<TopServicio[]> {
   const { supabase } = await requireUser();
-  const ahora = new Date();
-  const mesIni = inicioMes(ahora);
-  const mesFin = inicioMesSiguiente(ahora);
+  const { desde, hasta } = resolverRango(filtros);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("citas")
     .select(
       "estado, servicio:servicios(id, nombre, duracion, precio)",
     )
-    .gte("inicio", mesIni.toISOString())
-    .lt("inicio", mesFin.toISOString())
-    .in("estado", ["confirmada", "completada"])
-    .returns<
-      Array<{
-        estado: string;
-        servicio: {
-          id: string;
-          nombre: string;
-          duracion: number;
-          precio: number;
-        } | null;
-      }>
-    >();
+    .gte("inicio", desde.toISOString())
+    .lt("inicio", hasta.toISOString())
+    .in("estado", ["confirmada", "completada"]);
+  if (filtros.empleadoId) query = query.eq("empleado_id", filtros.empleadoId);
+
+  const { data, error } = await query.returns<
+    Array<{
+      estado: string;
+      servicio: {
+        id: string;
+        nombre: string;
+        duracion: number;
+        precio: number;
+      } | null;
+    }>
+  >();
   if (error) throw new Error(error.message);
 
   const acc = new Map<string, TopServicio>();
@@ -323,6 +438,45 @@ export async function getTopServiciosMes(limit = 5): Promise<TopServicio[]> {
   return [...acc.values()]
     .sort((a, b) => b.veces - a.veces || b.ingresos - a.ingresos)
     .slice(0, limit);
+}
+
+export interface EstadosCitas {
+  completadas: number;
+  canceladas: number;
+  noAsistio: number;
+}
+
+export interface MetricasFiltros extends FiltroRango {
+  empleadoId?: string | null;
+}
+
+export async function getEstadosCitas(
+  filtros: MetricasFiltros = {},
+): Promise<EstadosCitas> {
+  const { supabase } = await requireUser();
+  const { desde, hasta } = resolverRango(filtros);
+
+  const base = () => {
+    let q = supabase
+      .from("citas")
+      .select("id", { count: "exact", head: true })
+      .gte("inicio", desde.toISOString())
+      .lt("inicio", hasta.toISOString());
+    if (filtros.empleadoId) q = q.eq("empleado_id", filtros.empleadoId);
+    return q;
+  };
+
+  const [completadasRes, canceladasRes, noShowRes] = await Promise.all([
+    base().eq("estado", "completada"),
+    base().eq("estado", "cancelada"),
+    base().eq("estado", "no_asistio"),
+  ]);
+
+  return {
+    completadas: completadasRes.count ?? 0,
+    canceladas: canceladasRes.count ?? 0,
+    noAsistio: noShowRes.count ?? 0,
+  };
 }
 
 export async function getRolMetricas(): Promise<"propietario" | "barbero" | null> {
