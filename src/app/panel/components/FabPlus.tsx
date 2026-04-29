@@ -17,7 +17,7 @@ export function FabPlus({ onClick, ariaLabel = "Nueva cita" }: FabPlusProps) {
         type="button"
         onClick={onClick}
         aria-label={ariaLabel}
-        className="fab-disc shimmer-cta"
+        className="fab-disc"
       >
         <Plus className="h-7 w-7" strokeWidth={2.4} />
       </button>
