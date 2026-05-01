@@ -5,7 +5,6 @@ export type StepId =
   | "barbero"
   | "servicio"
   | "dia"
-  | "hora"
   | "datos"
   | "confirmacion";
 
@@ -14,7 +13,6 @@ export const STEP_ORDER: StepId[] = [
   "barbero",
   "servicio",
   "dia",
-  "hora",
   "datos",
   "confirmacion",
 ];

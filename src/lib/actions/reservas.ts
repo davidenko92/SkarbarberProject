@@ -53,6 +53,10 @@ export async function getHorarioLaboral(): Promise<HorarioLaboral> {
   return data.horario_laboral as HorarioLaboral;
 }
 
+function nowMadridIsoLocal(): string {
+  return new Date().toLocaleString("sv-SE", { timeZone: "Europe/Madrid" });
+}
+
 function generarSlotsDelTramo(
   fecha: string,
   tramo: HorarioTramo,
@@ -112,13 +116,14 @@ export async function getSlotsDisponibles(input: SlotsInput): Promise<string[]> 
     }),
   );
 
-  const ahora = Date.now();
+  const ahoraMadrid = nowMadridIsoLocal();
 
   return todosSlots.filter((slot) => {
+    const slotIsoMadrid = `${fecha} ${slot}:00`;
+    if (slotIsoMadrid < ahoraMadrid) return false;
+
     const inicioSlot = new Date(`${fecha}T${slot}:00`).getTime();
     const finSlot = inicioSlot + duracionMin * 60_000;
-
-    if (inicioSlot < ahora) return false;
 
     return !ocupados.some(
       (cita: { inicio: number; fin: number }) =>
@@ -172,7 +177,7 @@ export async function getDiasLlenos(
     ocupadosPorDia.set(clave, arr);
   }
 
-  const ahora = Date.now();
+  const ahoraMadrid = nowMadridIsoLocal();
   const diasLlenos: string[] = [];
 
   for (let i = 0; i < diasAFuturo; i++) {
@@ -190,9 +195,10 @@ export async function getDiasLlenos(
     const ocupados = ocupadosPorDia.get(fecha) ?? [];
 
     const hayHueco = slots.some((slot) => {
+      const slotIsoMadrid = `${fecha} ${slot}:00`;
+      if (slotIsoMadrid < ahoraMadrid) return false;
       const inicioSlot = new Date(`${fecha}T${slot}:00`).getTime();
       const finSlot = inicioSlot + duracionMin * 60_000;
-      if (inicioSlot < ahora) return false;
       return !ocupados.some(
         (c) => inicioSlot < c.fin && finSlot > c.inicio,
       );

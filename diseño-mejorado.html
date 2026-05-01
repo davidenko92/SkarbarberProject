@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skar Barber Panel</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #050505;
+      --bg-soft: #0b0b0b;
+      --card-bg: rgba(16, 16, 16, 0.72);
+      --card-border: rgba(201, 162, 77, 0.35);
+      --gold: #d6aa4f;
+      --gold-light: #f4d984;
+      --gold-dark: #8f6b28;
+      --white: #f8f3ea;
+      --muted: #8d8d8d;
+      --muted-dark: #5e5e5e;
+      --danger: #e86a6a;
+      --shadow-gold: 0 0 22px rgba(214, 170, 79, 0.32);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(214, 170, 79, 0.12), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(214, 170, 79, 0.08), transparent 28%),
+        linear-gradient(180deg, #080808 0%, #020202 100%);
+      color: var(--white);
+      font-family: "Inter", sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 110px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 35%),
+        #050505;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: 0.08;
+    }
+
+    .top-header {
+      position: relative;
+      z-index: 2;
+      padding: 34px 26px 30px;
+      border-bottom: 1px solid rgba(214, 170, 79, 0.34);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 1px solid rgba(214, 170, 79, 0.8);
+      background:
+        radial-gradient(circle at center, rgba(214,170,79,0.18), transparent 60%),
+        #070707;
+      box-shadow: var(--shadow-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--white);
+      filter: drop-shadow(0 0 8px rgba(244, 217, 132, 0.35));
+    }
+
+    .brand-text h1 {
+      font-family: "Cinzel", serif;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -0.8px;
+    }
+
+    .brand-text h1 span {
+      color: var(--gold);
+    }
+
+    .brand-text p {
+      margin-top: 7px;
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 7px;
+      font-weight: 500;
+    }
+
+    .logout {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid rgba(214, 170, 79, 0.55);
+      background: rgba(255,255,255,0.02);
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 16px rgba(214, 170, 79, 0.08);
+    }
+
+    .logout svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      padding: 28px 26px 0;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      letter-spacing: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .page-title {
+      font-family: "Cinzel", serif;
+      font-size: 45px;
+      line-height: 1;
+      font-weight: 500;
+      letter-spacing: -1px;
+      margin-bottom: 42px;
+    }
+
+    .page-title span {
+      color: var(--gold);
+    }
+
+    .date-switcher {
+      display: grid;
+      grid-template-columns: 54px 1fr 54px;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+
+    .circle-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 1px solid rgba(214, 170, 79, 0.6);
+      background:
+        radial-gradient(circle at top, rgba(214,170,79,0.16), transparent 60%),
+        rgba(10,10,10,0.78);
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 18px rgba(214, 170, 79, 0.08);
+    }
+
+    .circle-btn svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .date-info {
+      text-align: center;
+    }
+
+    .date-info h2 {
+      font-family: "Cinzel", serif;
+      font-size: 34px;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .date-info p {
+      font-size: 12px;
+      letter-spacing: 6px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .filter-pill {
+      height: 48px;
+      padding: 0 25px;
+      border-radius: 999px;
+      border: 1px solid rgba(214, 170, 79, 0.42);
+      background: transparent;
+      color: var(--white);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .filter-pill.active {
+      background:
+        linear-gradient(180deg, #f6d77b 0%, #c79a38 100%);
+      color: #090909;
+      border-color: rgba(255, 224, 145, 0.9);
+      box-shadow: 0 0 22px rgba(214, 170, 79, 0.45);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 46px;
+    }
+
+    .stat-card {
+      min-height: 112px;
+      border-radius: var(--radius-lg);
+      padding: 22px 18px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.005)),
+        var(--card-bg);
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        inset 0 0 26px rgba(255,255,255,0.015),
+        0 12px 35px rgba(0,0,0,0.35);
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(214,170,79,0.38), transparent);
+    }
+
+    .stat-card h3 {
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 5px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .stat-card .value {
+      font-family: "Cinzel", serif;
+      font-size: 44px;
+      line-height: 1;
+      color: var(--white);
+    }
+
+    .stat-card .value.gold {
+      color: var(--gold-light);
+    }
+
+    .stat-icon {
+      position: absolute;
+      right: 18px;
+      top: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(214, 170, 79, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-light);
+      background: rgba(214, 170, 79, 0.07);
+    }
+
+    .stat-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .empty-state {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .chair-badge {
+      width: 112px;
+      height: 112px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(214, 170, 79, 0.45);
+      background:
+        radial-gradient(circle at center, rgba(214,170,79,0.18), rgba(214,170,79,0.03) 58%, transparent 70%);
+      box-shadow: var(--shadow-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-light);
+    }
+
+    .chair-badge svg {
+      width: 58px;
+      height: 58px;
+    }
+
+    .empty-state h2 {
+      font-family: "Cinzel", serif;
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 15px;
+      max-width: 250px;
+      margin: 0 auto;
+    }
+
+    .fab {
+      position: fixed;
+      z-index: 10;
+      right: max(24px, calc((100vw - 430px) / 2 + 24px));
+      bottom: 102px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 232, 162, 0.85);
+      background:
+        linear-gradient(180deg, #f6d77b 0%, #c99b38 100%);
+      color: #070707;
+      font-size: 42px;
+      font-weight: 300;
+      box-shadow:
+        0 0 28px rgba(214, 170, 79, 0.55),
+        inset 0 0 10px rgba(255,255,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      z-index: 20;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(calc(100% - 22px), 408px);
+      height: 84px;
+      border-radius: 24px;
+      border: 1px solid rgba(214, 170, 79, 0.45);
+      background:
+        linear-gradient(180deg, rgba(20,20,20,0.92), rgba(8,8,8,0.94));
+      backdrop-filter: blur(18px);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      box-shadow:
+        0 -10px 30px rgba(0,0,0,0.55),
+        inset 0 0 25px rgba(214,170,79,0.04);
+      overflow: hidden;
+    }
+
+    .nav-item {
+      position: relative;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-item svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .nav-item.active {
+      color: var(--gold-light);
+      background: linear-gradient(180deg, rgba(214,170,79,0.16), transparent);
+    }
+
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 48px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--gold-light);
+      box-shadow: 0 0 18px rgba(214,170,79,0.9);
+    }
+
+    @media (max-width: 380px) {
+      .brand-text h1 {
+        font-size: 24px;
+      }
+
+      .page-title {
+        font-size: 39px;
+      }
+
+      .stat-card {
+        min-height: 104px;
+        padding: 18px 15px;
+      }
+
+      .stat-card .value {
+        font-size: 38px;
+      }
+
+      .date-info h2 {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <header class="top-header">
+      <div class="brand">
+        <div class="logo">
+          <!-- Icono tipo barber/mascota simple -->
+          <svg viewBox="0 0 64 64" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M44 16c-6-6-18-4-24 3-6 8-5 20 1 27" />
+            <path d="M21 33c6 0 10 4 13 12" />
+            <path d="M38 18c-1 5-5 8-11 9" />
+            <path d="M25 38c-4 0-8 3-9 8" />
+            <path d="M42 28c5 5 6 12 3 19" />
+            <path d="M29 20c2 3 6 4 11 3" />
+          </svg>
+        </div>
+
+        <div class="brand-text">
+          <h1>Skar <span>Barber</span></h1>
+          <p>PANEL</p>
+        </div>
+      </div>
+
+      <button class="logout" aria-label="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <path d="M10 17l5-5-5-5"/>
+          <path d="M15 12H3"/>
+        </svg>
+      </button>
+    </header>
+
+    <main>
+      <p class="eyebrow">PANEL · SKAR BARBER</p>
+      <h1 class="page-title">Agenda <span>·</span></h1>
+
+      <section class="date-switcher">
+        <button class="circle-btn" aria-label="Día anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+
+        <div class="date-info">
+          <h2>Hoy</h2>
+          <p>DOMINGO, 26 DE ABRIL</p>
+        </div>
+
+        <button class="circle-btn" aria-label="Día siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </section>
+
+      <section class="filters">
+        <button class="filter-pill active">Todos</button>
+        <button class="filter-pill">David</button>
+        <button class="filter-pill">Test</button>
+      </section>
+
+      <section class="stats">
+        <article class="stat-card">
+          <h3>CITAS</h3>
+          <p class="value">0</p>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="17" rx="2"/>
+              <path d="M8 2v4M16 2v4M3 10h18"/>
+            </svg>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <h3>INGRESOS</h3>
+          <p class="value gold">0€</p>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 17l6-6 4 4 7-8"/>
+              <path d="M14 7h6v6"/>
+            </svg>
+          </div>
+        </article>
+      </section>
+
+      <section class="empty-state">
+        <div class="chair-badge">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 13h15a6 6 0 0 1 6 6v8H20v-8a6 6 0 0 1 3-6z"/>
+            <path d="M18 27h30a7 7 0 0 1 7 7v4H11v-4a7 7 0 0 1 7-7z"/>
+            <path d="M16 38h34v7a6 6 0 0 1-6 6H22a6 6 0 0 1-6-6v-7z"/>
+            <path d="M32 51v8"/>
+            <path d="M22 59h20"/>
+            <path d="M12 36L8 50"/>
+            <path d="M52 36l4 14"/>
+          </svg>
+        </div>
+
+        <h2>Sin citas</h2>
+        <p>No hay citas para este día con el filtro activo.</p>
+      </section>
+    </main>
+
+    <button class="fab" aria-label="Añadir cita">+</button>
+
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="17" rx="2"/>
+          <path d="M8 2v4M16 2v4M3 10h18"/>
+        </svg>
+        AGENDA
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9.5" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        CLIENTES
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="3"/>
+          <circle cx="6" cy="18" r="3"/>
+          <path d="M20 4L8.5 15.5"/>
+          <path d="M14 14l6 6"/>
+        </svg>
+        SERVICIOS
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19V9"/>
+          <path d="M10 19V5"/>
+          <path d="M16 19v-7"/>
+          <path d="M22 19H2"/>
+        </svg>
+        STATS
+      </a>
+
+      <a href="#" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-.4-1 1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1-.4H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1-.4 1.7 1.7 0 0 0 .6-1A1.7 1.7 0 0 0 4.35 6.3l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 .4 1 1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.2.37.4.7.6 1a1.7 1.7 0 0 0 1 .4H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1 .4 1.7 1.7 0 0 0-.51.2z"/>
+        </svg>
+        CONFIG
+      </a>
+    </nav>
+
+  </div>
+</body>
+</html>

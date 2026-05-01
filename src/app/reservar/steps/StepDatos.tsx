@@ -52,7 +52,7 @@ export function StepDatos({
       className="animate-step-in flex flex-1 flex-col"
     >
       <StepHeading
-        eyebrow="Paso 05 · Datos"
+        eyebrow="Paso 04 · Datos"
         title={
           <>
             Tus <em>datos</em>

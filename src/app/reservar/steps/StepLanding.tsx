@@ -1,10 +1,33 @@
 import Image from "next/image";
+import { Phone } from "lucide-react";
 import { GlassCard } from "../components/GlassCard";
 import { GoldButton } from "../components/GoldButton";
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.85"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="3.6" />
+      <circle cx="17.4" cy="6.6" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
 
 interface StepLandingProps {
   onStart: () => void;
 }
+
+const TELEFONO_BARBERIA = "623404772";
+const INSTAGRAM_URL = "https://instagram.com/skarbarber";
 
 export function StepLanding({ onStart }: StepLandingProps) {
   return (
@@ -24,7 +47,7 @@ export function StepLanding({ onStart }: StepLandingProps) {
           />
         </div>
 
-        <span className="eyebrow mb-2">Alcalá de Henares · est. 2019</span>
+        <span className="eyebrow mb-2">Alcalá de Henares · est. 2020</span>
 
         <h1 className="brand-display text-[48px] uppercase leading-[0.95] text-white sm:text-[56px]">
           Skar <em>Barber</em>
@@ -44,16 +67,6 @@ export function StepLanding({ onStart }: StepLandingProps) {
 
       <GlassCard variant="solid" className="w-full rounded-[1.75rem] px-7 py-7">
         <div className="grid gap-5 text-sm">
-          <InfoRow label="Teléfono">
-            <a href="tel:623404772" className="hover:text-gold">
-              623 404 772
-            </a>
-            <span className="mx-2 text-white/30">·</span>
-            <a href="tel:914886768" className="hover:text-gold">
-              914 886 768
-            </a>
-          </InfoRow>
-
           <InfoRow label="Dirección">Alcalá de Henares, Madrid</InfoRow>
 
           <InfoRow label="Horario">
@@ -63,39 +76,24 @@ export function StepLanding({ onStart }: StepLandingProps) {
 
           <div className="hairline mt-1" />
 
-          <a
-            href="https://instagram.com/skarbarber"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 pt-1 text-[13px] uppercase tracking-[0.22em] text-gold-light transition-opacity hover:opacity-80"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <a
+              href={`tel:${TELEFONO_BARBERIA}`}
+              className="contact-action contact-action--primary"
             >
-              <path
-                d="M17 2h-10c-2.76 0-5 2.24-5 5v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5v-10c0-2.76-2.24-5-5-5z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-              />
-              <path
-                d="M16 11.37c0 1.99-1.61 3.63-3.59 3.63-1.99 0-3.59-1.64-3.59-3.63s1.6-3.63 3.59-3.63c1.98 0 3.59 1.63 3.59 3.63z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-              />
-              <path
-                d="M17.5 6.5h.01"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.6"
-              />
-            </svg>
-            @skarbarber
-          </a>
+              <Phone className="h-[18px] w-[18px]" strokeWidth={1.85} />
+              <span>Llamar</span>
+            </a>
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-action"
+            >
+              <InstagramIcon className="h-[18px] w-[18px]" />
+              <span>Instagram</span>
+            </a>
+          </div>
         </div>
       </GlassCard>
     </div>

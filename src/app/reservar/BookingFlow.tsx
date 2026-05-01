@@ -15,7 +15,6 @@ import { StepBarbero } from "./steps/StepBarbero";
 import { StepConfirmacion } from "./steps/StepConfirmacion";
 import { StepDatos } from "./steps/StepDatos";
 import { StepDia } from "./steps/StepDia";
-import { StepHora } from "./steps/StepHora";
 import { StepLanding } from "./steps/StepLanding";
 import { StepServicio } from "./steps/StepServicio";
 
@@ -61,7 +60,7 @@ export function BookingFlow({ barberos, servicios, horario }: BookingFlowProps) 
 
   const { barbero, servicio } = selectBooking(state, barberos, servicios);
   const stepIndex =
-    ["landing", "barbero", "servicio", "dia", "hora", "datos", "confirmacion"].indexOf(state.step) + 1;
+    ["landing", "barbero", "servicio", "dia", "datos", "confirmacion"].indexOf(state.step) + 1;
 
   async function submitReserva() {
     if (!state.barberoId || !state.servicioId || !state.fecha || !state.hora) {
@@ -132,18 +131,9 @@ export function BookingFlow({ barberos, servicios, horario }: BookingFlowProps) 
           empleadoId={state.barberoId}
           duracionMin={servicio.duracion}
           fechaSeleccionada={state.fecha}
-          onSelect={(f) => dispatch({ type: "SELECT_FECHA", fecha: f })}
-          onContinue={() => dispatch({ type: "NEXT" })}
-        />
-      )}
-
-      {state.step === "hora" && state.barberoId && state.fecha && servicio && (
-        <StepHora
-          empleadoId={state.barberoId}
-          fecha={state.fecha}
-          duracionMin={servicio.duracion}
           horaSeleccionada={state.hora}
-          onSelect={(h) => dispatch({ type: "SELECT_HORA", hora: h })}
+          onSelectFecha={(f) => dispatch({ type: "SELECT_FECHA", fecha: f })}
+          onSelectHora={(h) => dispatch({ type: "SELECT_HORA", hora: h })}
           onContinue={() => dispatch({ type: "NEXT" })}
         />
       )}
