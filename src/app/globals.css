@@ -209,6 +209,57 @@
 }
 
 /* ============================================
+ * Client booking typography
+ * Public pages use one clean sans style, matching calendar day numbers.
+ * ============================================ */
+.client-booking,
+.client-booking button,
+.client-booking input,
+.client-booking textarea {
+  font-family: var(--font-sans);
+}
+
+.client-booking .display-serif,
+.client-booking .brand-display,
+.client-booking .step-heading__title,
+.client-booking .step-block-title,
+.client-booking .font-serif {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.client-booking .display-serif em,
+.client-booking .brand-display em,
+.client-booking .step-heading__title em,
+.client-booking .step-block-title em {
+  background: none;
+  background-clip: border-box;
+  font-family: inherit;
+  font-style: normal;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+}
+
+.client-booking .step-heading__title {
+  line-height: 1.04;
+}
+
+.client-booking .brand-display {
+  line-height: 0.98;
+}
+
+.client-booking .calendar-day,
+.client-booking .slot-tile {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* ============================================
  * Editorial glass card — harmonizes with silk gold-dark bg
  * Layered: warm top wash → clear mid → deep bottom + lateral glints
  * ============================================ */
@@ -1460,9 +1511,14 @@
   color: rgba(255, 255, 255, 0.85);
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
-  border: 0;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: background 140ms ease, color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 160ms ease,
+    color 140ms ease,
+    transform 140ms ease;
 }
 
 .calendar-day:hover:not(.calendar-day--selected) {
@@ -1498,14 +1554,30 @@
   border-radius: 0;
 }
 
-.calendar-day--selected {
+.calendar-day--selected,
+.edge-tile--soft-gold {
   background:
     radial-gradient(circle at 50% 30%, #ffe9b6 0%, #e5c171 35%, #c4a462 75%, #a98724 100%);
+  border-color: rgba(154, 122, 35, 0.85);
   color: #0a0a0a;
   font-weight: 600;
+  text-shadow: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 247, 220, 0.6),
-    0 0 18px -4px rgba(229, 193, 113, 0.6);
+    inset 0 -1px 0 rgba(101, 76, 8, 0.45),
+    0 0 24px -4px rgba(229, 193, 113, 0.65),
+    0 10px 24px -8px rgba(0, 0, 0, 0.7);
+}
+
+.calendar-day--selected:hover,
+.edge-tile--soft-gold:hover:not(:disabled) {
+  filter: brightness(1.04);
+  color: #0a0a0a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 247, 220, 0.65),
+    inset 0 -1px 0 rgba(101, 76, 8, 0.5),
+    0 0 32px -4px rgba(229, 193, 113, 0.78),
+    0 14px 28px -8px rgba(0, 0, 0, 0.75);
 }
 
 .calendar-day--booking {
@@ -1678,12 +1750,60 @@
     0 0 30px -10px rgba(229, 193, 113, 0.18);
 }
 
+.step-block--calendar {
+  background:
+    radial-gradient(
+      120% 55% at 50% -8%,
+      rgba(229, 193, 113, 0.075) 0%,
+      transparent 62%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.018) 0%,
+      rgba(0, 0, 0, 0.16) 100%
+    );
+}
+
+.step-block--slots {
+  border-color: rgba(229, 193, 113, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.1),
+    inset 0 0 0 1px rgba(229, 193, 113, 0.04),
+    0 16px 36px -22px rgba(0, 0, 0, 0.78),
+    0 0 34px -12px rgba(229, 193, 113, 0.24);
+}
+
 .step-block-header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.55rem 0.85rem;
   margin-bottom: 1.1rem;
+}
+
+.step-block-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  color: rgba(229, 193, 113, 0.82);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(229, 193, 113, 0.18), transparent 70%),
+    rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(229, 193, 113, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 170, 0.1),
+    0 0 18px -10px rgba(229, 193, 113, 0.6);
+  flex: 0 0 auto;
+}
+
+.step-block-icon--accent {
+  color: #0a0a0a;
+  background:
+    radial-gradient(circle at 50% 30%, #ffe9b6 0%, #e5c171 42%, #c4a462 100%);
+  border-color: rgba(154, 122, 35, 0.85);
 }
 
 .step-block-eyebrow {
@@ -1752,32 +1872,28 @@
 }
 
 /* ============================================
- * Edge-tile — variante slot seleccionado, idéntica visualmente al
- * .calendar-day--selected para coherencia entre calendario y horas.
+ * Slot grid — compact time choices aligned with calendar selection
  * ============================================ */
-.edge-tile--soft-gold {
-  background:
-    radial-gradient(circle at 50% 30%, #ffe9b6 0%, #e5c171 35%, #c4a462 75%, #a98724 100%);
-  border-color: rgba(154, 122, 35, 0.85);
-  color: #0a0a0a;
-  font-weight: 600;
-  text-shadow: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 247, 220, 0.6),
-    inset 0 -1px 0 rgba(101, 76, 8, 0.45),
-    0 0 24px -4px rgba(229, 193, 113, 0.65),
-    0 10px 24px -8px rgba(0, 0, 0, 0.7);
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
 }
 
-.edge-tile--soft-gold:hover:not(:disabled) {
-  filter: brightness(1.04);
+.slot-tile {
+  min-height: 46px;
+  border-radius: 0.65rem;
+  padding: 0.75rem 0.35rem;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-tile--selected {
   transform: translateY(-1px);
-  color: #0a0a0a;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 247, 220, 0.65),
-    inset 0 -1px 0 rgba(101, 76, 8, 0.5),
-    0 0 32px -4px rgba(229, 193, 113, 0.78),
-    0 14px 28px -8px rgba(0, 0, 0, 0.75);
 }
 
 /* Reduced motion — kill heavy animations */

@@ -2,6 +2,7 @@
 
 import { getDiasLlenos, getSlotsDisponibles } from "@/lib/actions/reservas";
 import type { HorarioLaboral } from "@/lib/types";
+import { CalendarDays, Clock3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { GoldButton } from "../components/GoldButton";
 import { StepHeading } from "../components/StepHeading";
@@ -95,9 +96,11 @@ export function StepDia({
         }
       />
 
-      <section className="step-block">
+      <section className="step-block step-block--calendar">
         <div className="step-block-header">
-          <span className="step-block-eyebrow">01 · Día</span>
+          <span className="step-block-icon" aria-hidden>
+            <CalendarDays className="h-[15px] w-[15px]" strokeWidth={1.8} />
+          </span>
           <span className="step-block-title">Elige una fecha</span>
         </div>
         <BookingCalendar
@@ -113,9 +116,11 @@ export function StepDia({
         <>
           <div className="step-block-divider" aria-hidden />
 
-          <section className="step-block step-block--accent">
+          <section className="step-block step-block--accent step-block--slots">
             <div className="step-block-header">
-              <span className="step-block-eyebrow">02 · Hora</span>
+              <span className="step-block-icon step-block-icon--accent" aria-hidden>
+                <Clock3 className="h-[15px] w-[15px]" strokeWidth={1.8} />
+              </span>
               <span className="step-block-title">
                 Horas <em>disponibles</em>
               </span>
@@ -194,17 +199,18 @@ interface SlotGridProps {
 
 function SlotGrid({ slots, seleccionada, onSelect }: SlotGridProps) {
   return (
-    <div className="grid grid-cols-3 gap-2.5">
+    <div className="slot-grid">
       {slots.map((h) => {
         const activo = h === seleccionada;
         return (
           <button
             key={h}
             type="button"
+            aria-pressed={activo}
             onClick={() => onSelect(h)}
             className={[
-              "edge-tile rounded-full py-3 font-serif text-[16px] font-normal leading-none tracking-wide",
-              activo ? "edge-tile--soft-gold" : "text-white/90",
+              "edge-tile slot-tile",
+              activo ? "edge-tile--soft-gold slot-tile--selected" : "text-white/90",
             ].join(" ")}
           >
             {h}

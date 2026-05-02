@@ -181,6 +181,7 @@ export function BookingCalendar({
               key={i}
               type="button"
               disabled={disabled}
+              aria-pressed={seleccionado}
               onClick={handleClick}
               title={
                 cerrado

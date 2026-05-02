@@ -20,7 +20,7 @@ export function ReservarShell({
   showHeader = true,
 }: ReservarShellProps) {
   return (
-    <div className="relative min-h-dvh w-full overflow-hidden">
+    <div className="client-booking relative min-h-dvh w-full overflow-hidden">
       <SilkBackground />
 
       <main className="relative z-10 mx-auto flex min-h-dvh w-full max-w-md flex-col px-6 py-6">
